@@ -15,8 +15,6 @@ Tintin_reporter::Tintin_reporter(std::string file_path) : file_path(file_path) {
 				std::cerr << "Error: cannot create directory" << std::endl;
 		}
 	}
-	this->file_stream = std::ofstream(this->file_path,
-			std::ios::out | std::ios::app);
 }
 
 Tintin_reporter::Tintin_reporter(Tintin_reporter const & src) {
@@ -24,26 +22,27 @@ Tintin_reporter::Tintin_reporter(Tintin_reporter const & src) {
 }
 
 Tintin_reporter::~Tintin_reporter() {
-	this->file_stream.flush();
-	this->file_stream.close();
+
 }
 
 Tintin_reporter & Tintin_reporter::operator=(Tintin_reporter const & rhs) {
 	if (this != &rhs) {
 		this->file_path = rhs.file_path;
-		this->file_stream = std::ofstream(rhs.file_path,
-				std::ios::out | std::ios::app);
+		this->parent_directory_path = rhs.parent_directory_path;
 	}
 	return (*this);
 }
 
 void Tintin_reporter::log(const std::string &message) {
 	struct stat buffer;
-	this->file_stream << format_log(message);
-	this->file_stream.flush();
+	std::ofstream file_stream(this->file_path,std::ios::out | std::ios::app);
+
+	file_stream << format_log(message);
+	file_stream.flush();
 	stat(this->file_path.c_str(), &buffer);
 	if (buffer.st_size > 10000000) // Archive when filesize exceed 10Mb
 		archive();
+	file_stream.close();
 }
 
 std::string Tintin_reporter::format_log(const std::string &message) {
@@ -63,7 +62,6 @@ void		Tintin_reporter::archive() {
 	std::string cmd;
 	std::string filename;
 
-	this->file_stream.close();
 	ss << std::time(nullptr);
 	archive_name = "matt_daemon_" + ss.str() + ".tar.gz";
 	filename = this->file_path.substr(this->file_path.find_last_of("/\\") + 1);
