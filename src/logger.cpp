@@ -41,7 +41,6 @@ void Tintin_reporter::log(const std::string &message) {
 	struct stat buffer;
 	this->file_stream << format_log(message);
 	this->file_stream.flush();
-	archive();
 	stat(this->file_path.c_str(), &buffer);
 	if (buffer.st_size > 10000000) // Archive when filesize exceed 10Mb
 		archive();
@@ -62,12 +61,13 @@ void		Tintin_reporter::archive() {
 	std::stringstream ss;
 	std::string archive_name;
 	std::string cmd;
+	std::string filename;
 
 	this->file_stream.close();
 	ss << std::time(nullptr);
-	archive_name = this->parent_directory_path +
-		"matt_daemon_" + ss.str() + ".tar.gz";
-	cmd = "tar -czf "  + archive_name + " " + this->file_path;
-	std::cout << "archive"<< std::endl;
+	archive_name = "matt_daemon_" + ss.str() + ".tar.gz";
+	filename = this->file_path.substr(this->file_path.find_last_of("/\\") + 1);
+	cmd = "tar -czf " + archive_name + " " + filename
+		+ " -C " + this->parent_directory_path;
 	system(cmd.c_str());
 }
