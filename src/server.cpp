@@ -135,6 +135,7 @@ void	init_sigfd()
 {
 	struct sigaction	sigact;
 	struct rlimit		rlim;
+	sigset_t			sigset;
 
 	memset(&sigact, 0, sizeof sigact);
 	memset(&rlim, 0, sizeof rlim);
@@ -147,4 +148,6 @@ void	init_sigfd()
 		sigact.sa_handler = SIG_DFL;
 		sigaction(i, &sigact, NULL);
 	}
+	sigemptyset(&sigset);
+	sigprocmask(SIG_SETMASK, &sigset, NULL);
 }
