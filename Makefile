@@ -1,14 +1,21 @@
-NAME = Matt_daemon
-
 SRCS_DIR = ./src/
 
 INCLUDE_DIR = ./include
 
-SRC_FILE = matt_daemon.cpp logger.cpp
 
-SRC = $(addprefix $(SRCS_DIR), $(SRC_FILE))
+SRC_FILE_MATT = matt_daemon.cpp logger.cpp
 
-OBJ = $(SRC:%.cpp=%.o)
+SRC_MATT = $(addprefix $(SRCS_DIR), $(SRC_FILE_MATT))
+
+OBJ_MATT = $(SRC_MATT:%.cpp=%.o)
+
+
+SRC_FILE_BEN = ben_afk.cpp utils.cpp
+
+SRC_BEN = $(addprefix $(SRCS_DIR), $(SRC_FILE_BEN))
+
+OBJ_BEN = $(SRC_BEN:%.cpp=%.o)
+
 
 CC = g++
 
@@ -18,19 +25,24 @@ IFLAGS = -I$(INCLUDE_DIR)
 
 CFLAGS = -Wall -Werror -Wextra -std=c++14 $(IFLAGS)
 
-all: $(NAME)
+all: Matt_daemon Ben_AFK
 
-$(NAME): $(OBJ)
-	$(CC) -o $(NAME) $(OBJ) $(LFLAGS)
+Matt_daemon: $(OBJ_MATT)
+	$(CC) -o $@ $^ $(LFLAGS)
+
+Ben_AFK: $(OBJ_BEN)
+	$(CC) -o $@ $^ $(LFLAGS)
 
 %.o: %.cpp
 	$(CC) -o $@ -c $^ $(CFLAGS)
 
 clean:
-	@rm -f $(OBJ)
+	@rm -f $(OBJ_MATT)
+	@rm -f $(OBJ_BEN)
 
 fclean: clean
-	@rm -f $(NAME)
+	@rm -f Matt_daemon
+	@rm -f Ben_AFK
 
 re: fclean all
 
