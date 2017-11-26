@@ -8,6 +8,7 @@ void matt_daemon()
 	memset(&sigact, 0, sizeof sigact);
     pid = fork();
     if (pid < 0) {
+		close_server(0);
         exit(1);
 	}
     if (pid > 0) {
@@ -15,6 +16,7 @@ void matt_daemon()
 	}
 
     if (setsid() < 0) {
+		close_server(0);
     	exit(1);
 	}
 	sigact.sa_handler = SIG_IGN;
@@ -23,6 +25,7 @@ void matt_daemon()
 
     pid = fork();
     if (pid < 0) {
+		close_server(0);
         exit(1);
 	}
     if (pid > 0) {
