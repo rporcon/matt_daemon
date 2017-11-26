@@ -6,7 +6,7 @@
 /*   By: rporcon <rporcon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2017/08/19 19:07:53 by rporcon           #+#    #+#             */
-/*   Updated: 2017/11/26 17:43:03 by amathias         ###   ########.fr       */
+/*   Updated: 2017/11/26 17:58:33 by amathias         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,12 +26,17 @@ void Server::pck_rcv(int *clt_sock, int *clean_fd)
 	/* 	printf("received: %s\n", buf); */
 	/* } */
 	Tintin_reporter::getInstance().log("received: " + std::string(buf));
+
 	if (rcv_ret <= 0) {
 		printf("close fd: %d\n", *clt_sock);
 		Tintin_reporter::getInstance().log("connection closed");
 		close(*clt_sock);
 		*clt_sock = -1;
 		*clean_fd = 1;
+	}
+	if (std::string(buf).compare("quit") == 0) {
+		// Close daemon
+		close_server(0);
 	}
 }
 

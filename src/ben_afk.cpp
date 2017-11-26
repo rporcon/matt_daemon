@@ -37,9 +37,9 @@ int		main(void)
 	while (std::cin.good()){
 		std::cout << "$ ";
 		std::cin >> buffer;
+		send_message(fd, buffer);
 		if (buffer == "quit")
 			break ;
-		send_message(fd, buffer);
 	}
 	close(fd);
 }
