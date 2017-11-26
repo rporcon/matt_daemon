@@ -1,6 +1,3 @@
-#ifndef MATT_DAEMON_HPP
-# define MATT_DAEMONH_HPP
-
 #pragma once
 
 #include <iostream>
@@ -50,5 +47,3 @@ void		err_exit(const char *err_msg);
 void		perr_exit(const char *str);
 void		init_sigfd();
 void		close_server(int signum);
-
-# endif
