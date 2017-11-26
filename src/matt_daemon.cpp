@@ -36,24 +36,19 @@ int main(void) {
 	Server				serv;
 	struct sigaction	sigact;
 
-	memset(&sigact, 0, sizeof sigact);
 	if (getuid() != 0) {
 		std::cerr << "Error: must be root" << std::endl;
 		exit(1);
 	}
-
-	Tintin_reporter::getInstance().log("starting daemon");
-	matt_daemon();
 	init_sigfd();
 	g_lock_fd = open("/var/lock/matt_daemon.lock", O_CREAT);
-	if (g_lock_fd == -1) {
-		if (errno == EACCES)
-			err_exit("lock already there");
-		else
-			perr_exit("open");
-	}
-	if (flock(g_lock_fd, LOCK_EX) == -1)
+	if (flock(g_lock_fd, LOCK_EX | LOCK_NB) == -1) {
 		perr_exit("flock lock");
+	}
+
+	memset(&sigact, 0, sizeof sigact);
+	Tintin_reporter::getInstance().log("starting daemon");
+	matt_daemon();
 	sigact.sa_handler = &close_server;
 	sigaction(SIGINT, &sigact, NULL);
 
