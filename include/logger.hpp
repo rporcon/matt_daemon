@@ -11,6 +11,8 @@ public:
 private:
 	Tintin_reporter (void);
 	std::string 	file_path;
+	std::string		parent_directory_path;
 	std::ofstream	file_stream;
 	std::string		format_log(const std::string &message);
+	void			archive();
 };
