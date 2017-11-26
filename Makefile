@@ -3,7 +3,7 @@ SRCS_DIR = ./src/
 INCLUDE_DIR = ./include
 
 
-SRC_FILE_MATT = matt_daemon.cpp logger.cpp
+SRC_FILE_MATT = matt_daemon.cpp logger.cpp utils.cpp server.cpp
 
 SRC_MATT = $(addprefix $(SRCS_DIR), $(SRC_FILE_MATT))
 

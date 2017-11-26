@@ -36,7 +36,19 @@ using namespace std;
 
 extern int	g_lock_fd;
 
+class Server {
+	int		sock;
+
+	public:
+		void server_create (int);
+		void accept_clt_sock (void);
+		void clean_fd(struct pollfd *, int, int *);
+		void pck_rcv(int *, int *);
+};
+
 void		err_exit(const char *err_msg);
 void		perr_exit(const char *str);
+void		init_sigfd();
+void		close_server(int signum);
 
 # endif

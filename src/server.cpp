@@ -14,16 +14,6 @@
 
 int g_lock_fd;
 
-class Server {
-	int		sock;
-
-	public:
-		void server_create (int);
-		void accept_clt_sock (void);
-		void clean_fd(struct pollfd *, int, int *);
-		void pck_rcv(int *, int *);
-};
-
 void Server::pck_rcv(int *clt_sock, int *clean_fd)
 {
 	char				buf[BUF_SIZE];
@@ -55,7 +45,7 @@ void Server::server_create (int port) {
 		perr_exit("socket");
 	if (setsockopt(this->sock, SOL_SOCKET, SO_REUSEADDR, (char *)&on, sizeof(on)) == -1)
 		perr_exit("setsockopt SO_REUSEADDR");
-	fcntl(this->sock, F_GETFL, 0);
+	flags = fcntl(this->sock, F_GETFL, 0);
 	fcntl(this->sock, F_SETFL, flags | O_NONBLOCK);
 
 	bzero(&sin6, sizeof(sin6));
@@ -81,12 +71,13 @@ void Server::clean_fd (struct pollfd *pols, int pol_size, int *pol_nb) {
 }
 
 void Server::accept_clt_sock () {
-	struct pollfd			pols[MAX_SOCK] = {0};
+	struct pollfd			pols[MAX_SOCK];
 	int						pol_nb = 1;
 	int						clt_sock;
 	int						pol_size;
 	int						clean_fd = 0;
 
+	memset(pols, 0, sizeof pols);
 	pols[0].fd = this->sock;
 	pols[0].events = POLLIN;
 	pols[0].revents = 0;
@@ -127,6 +118,7 @@ void Server::accept_clt_sock () {
 }
 
 void	close_server(int signum) {
+	(void)signum;
 	printf("closing server\n");
 	if (unlink("/var/lock/matt_daemon.lock") == -1)
 		perr_exit("unlink");
@@ -138,9 +130,11 @@ void	close_server(int signum) {
 
 void	init_sigfd()
 {
-	struct sigaction	sigact = {0};
-	struct rlimit		rlim = {0};
+	struct sigaction	sigact;
+	struct rlimit		rlim;
 
+	memset(&sigact, 0, sizeof sigact);
+	memset(&rlim, 0, sizeof rlim);
 	getrlimit(RLIMIT_NOFILE, &rlim);
 	for (unsigned long i = 3; i < rlim.rlim_cur; i++) {
 		close(i);
@@ -150,27 +144,4 @@ void	init_sigfd()
 		sigact.sa_handler = SIG_DFL;
 		sigaction(i, &sigact, NULL);
 	}
-}
-
-int		main(int ac, char **av)
-{
-	Server				serv;
-	struct sigaction	sigact = {0};
-
-	init_sigfd();
-	g_lock_fd = open("/var/lock/matt_daemon.lock", O_CREAT);
-	if (g_lock_fd == -1) {
-		if (errno == EACCES)
-			err_exit("lock already there");
-		else
-			perr_exit("open");
-	}
-	if (flock(g_lock_fd, LOCK_EX) == -1)
-		perr_exit("flock lock");
-	sigact.sa_handler = &close_server;
-	sigaction(SIGINT, &sigact, NULL);
-
-	serv.server_create(4242);
-	serv.accept_clt_sock();
-	return (EXIT_SUCCESS);
 }

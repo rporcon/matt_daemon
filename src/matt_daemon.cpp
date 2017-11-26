@@ -54,13 +54,33 @@ void skeleton_daemon()
 }
 
 int main(void) {
+	Server				serv;
+	struct sigaction	sigact;
 	Tintin_reporter logger = Tintin_reporter("/var/log/matt_daemon/matt_daemon.log");
+
+	memset(&sigact, 0, sizeof sigact);
 	if (getuid() != 0) {
 		std::cerr << "Error: must be root" << std::endl;
 		exit(1);
 	}
 	logger.log("starting daemon");
-	skeleton_daemon();
-	sleep(20);
+
+	/* skeleton_daemon(); */
+	/* sleep(20); */
+	init_sigfd();
+	g_lock_fd = open("/var/lock/matt_daemon.lock", O_CREAT);
+	if (g_lock_fd == -1) {
+		if (errno == EACCES)
+			err_exit("lock already there");
+		else
+			perr_exit("open");
+	}
+	if (flock(g_lock_fd, LOCK_EX) == -1)
+		perr_exit("flock lock");
+	sigact.sa_handler = &close_server;
+	sigaction(SIGINT, &sigact, NULL);
+
+	serv.server_create(4242);
+	serv.accept_clt_sock();
 	return (0);
 }
