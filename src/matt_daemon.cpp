@@ -58,7 +58,11 @@ int main(void) {
 		std::cerr << "Error: must be root" << std::endl;
 		exit(1);
 	}
-	skeleton_daemon();
-	sleep(20);
+	Server serv;
+
+	serv.server_create(4242);
+	serv.accept_clt_sock();
+	/* skeleton_daemon(); */
+	/* sleep(20); */
 	return (0);
 }
