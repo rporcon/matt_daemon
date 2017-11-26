@@ -1,6 +1,6 @@
 #include "matt_daemon.hpp"
 
-static void skeleton_daemon()
+void skeleton_daemon()
 {
     pid_t pid;
 
@@ -54,15 +54,13 @@ static void skeleton_daemon()
 }
 
 int main(void) {
+	Tintin_reporter logger = Tintin_reporter("/var/log/matt_daemon/matt_daemon.log");
 	if (getuid() != 0) {
 		std::cerr << "Error: must be root" << std::endl;
 		exit(1);
 	}
-	Server serv;
-
-	serv.server_create(4242);
-	serv.accept_clt_sock();
-	/* skeleton_daemon(); */
-	/* sleep(20); */
+	logger.log("starting daemon");
+	skeleton_daemon();
+	sleep(20);
 	return (0);
 }
