@@ -21,14 +21,14 @@ void Server::pck_rcv(int *clt_sock, int *clean_fd)
 
 	bzero(buf, BUF_SIZE);
 	rcv_ret = recv(*clt_sock, buf, BUF_SIZE, 0);
-	printf("received: %sfrom fd %d (ret: %d)\n", buf, *clt_sock, rcv_ret);
+	/* printf("received: %sfrom fd %d (ret: %d)\n", buf, *clt_sock, rcv_ret); */
 	/* while ((rcv_ret = recv(clt_sock, buf, BUF_SIZE, 0)) > 0) { */
 	/* 	printf("received: %s\n", buf); */
 	/* } */
 	Tintin_reporter::getInstance().log("received: " + std::string(buf));
 
 	if (rcv_ret <= 0) {
-		printf("close fd: %d\n", *clt_sock);
+		/* printf("close fd: %d\n", *clt_sock); */
 		Tintin_reporter::getInstance().log("connection closed");
 		close(*clt_sock);
 		*clt_sock = -1;
@@ -103,7 +103,6 @@ void Server::accept_clt_sock () {
 					perr_exit("accept");
 				}
 				if (pol_nb == MAX_SOCK) {
-					fprintf(stderr, "Cannot handle more than 3 clients\n");
 					close(clt_sock);
 				}
 				else {
@@ -127,7 +126,6 @@ void Server::accept_clt_sock () {
 void	close_server(int signum) {
 	(void)signum;
 	Tintin_reporter::getInstance().log("stopping daemon");
-	printf("closing server\n");
 	if (unlink("/var/lock/matt_daemon.lock") == -1)
 		perr_exit("unlink");
 	if (flock(g_lock_fd, LOCK_UN) == -1)

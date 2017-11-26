@@ -7,22 +7,27 @@ void matt_daemon()
 
 	memset(&sigact, 0, sizeof sigact);
     pid = fork();
-    if (pid < 0)
+    if (pid < 0) {
         exit(1);
-    if (pid > 0)
+	}
+    if (pid > 0) {
         exit(0);
+	}
 
-    if (setsid() < 0)
-        exit(1);
+    if (setsid() < 0) {
+    	exit(1);
+	}
 	sigact.sa_handler = SIG_IGN;
 	sigaction(SIGCHLD, &sigact, NULL);
 	sigaction(SIGHUP, &sigact, NULL);
 
     pid = fork();
-    if (pid < 0)
+    if (pid < 0) {
         exit(1);
-    if (pid > 0)
+	}
+    if (pid > 0) {
         exit(0);
+	}
     umask(0);
     chdir("/");
 }
