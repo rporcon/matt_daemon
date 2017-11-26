@@ -4,7 +4,7 @@ SRCS_DIR = ./src/
 
 INCLUDE_DIR = ./include
 
-SRC_FILE = matt_daemon.cpp
+SRC_FILE = matt_daemon.cpp logger.cpp
 
 SRC = $(addprefix $(SRCS_DIR), $(SRC_FILE))
 
@@ -16,7 +16,7 @@ LFLAGS =
 
 IFLAGS = -I$(INCLUDE_DIR)
 
-CFLAGS = -Wall -Werror -Wextra $(IFLAGS)
+CFLAGS = -Wall -Werror -Wextra -std=c++14 $(IFLAGS)
 
 all: $(NAME)
 
