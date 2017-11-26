@@ -3,13 +3,18 @@
 
 class Tintin_reporter {
 public:
-	Tintin_reporter (std::string file_path);
-	Tintin_reporter(Tintin_reporter const &src);
-	virtual ~Tintin_reporter ();
-	Tintin_reporter & operator=(Tintin_reporter const & rhs);
+	static Tintin_reporter& getInstance() {
+		static Tintin_reporter instance("/var/log/matt_daemon/matt_daemon.log");
+		return (instance);
+	}
 	void			log(const std::string &message);
 private:
-	Tintin_reporter (void);
+	Tintin_reporter(void);
+	Tintin_reporter(std::string file_path);
+	Tintin_reporter(Tintin_reporter const &src);
+	Tintin_reporter & operator=(Tintin_reporter const & rhs);
+	virtual ~Tintin_reporter ();
+
 	std::string 	file_path;
 	std::string		parent_directory_path;
 	std::ofstream	file_stream;

@@ -56,15 +56,16 @@ void skeleton_daemon()
 int main(void) {
 	Server				serv;
 	struct sigaction	sigact;
-	Tintin_reporter logger = Tintin_reporter("/var/log/matt_daemon/matt_daemon.log");
+	/* Tintin_reporter logger = Tintin_reporter("/var/log/matt_daemon/matt_daemon.log"); */
 
 	memset(&sigact, 0, sizeof sigact);
 	if (getuid() != 0) {
 		std::cerr << "Error: must be root" << std::endl;
 		exit(1);
 	}
-	logger.log("starting daemon");
+	/* logger.log("starting daemon"); */
 
+	/* Tintin_reporter::getInstance().log("starting daemon"); */
 	/* skeleton_daemon(); */
 	/* sleep(20); */
 	init_sigfd();
