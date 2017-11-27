@@ -6,7 +6,7 @@
 /*   By: rporcon <rporcon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2017/08/19 19:07:53 by rporcon           #+#    #+#             */
-/*   Updated: 2017/11/27 11:35:24 by amathias         ###   ########.fr       */
+/*   Updated: 2017/11/27 11:49:03 by amathias         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -49,7 +49,8 @@ void Server::pck_rcv(int *clt_sock, int *clean_fd)
 
 	if (rcv_ret <= 0) {
 		/* printf("close fd: %d\n", *clt_sock); */
-		Tintin_reporter::getInstance().log("connection closed");
+		Tintin_reporter::getInstance().log("closed client socket "
+				+ std::to_string(*clt_sock));
 		close(*clt_sock);
 		*clt_sock = -1;
 		*clean_fd = 1;
@@ -122,14 +123,20 @@ void Server::accept_clt_sock () {
 				if ((clt_sock = accept(this->sock, NULL, NULL)) < 0) {
 					perr_exit("accept");
 				}
+				Tintin_reporter::getInstance().log(
+						"attempt to connect on socket " + std::to_string(clt_sock));
 				if (pol_nb == MAX_SOCK) {
 					close(clt_sock);
+					Tintin_reporter::getInstance().log("closed client socket "
+							+ std::to_string(clt_sock));
 				}
 				else {
 					pols[pol_nb].fd = clt_sock;
 					pols[pol_nb].events = POLLIN;
 					pols[pol_nb].revents = 0;
 					pol_nb++;
+					Tintin_reporter::getInstance().log("client connected on socket "
+							+ std::to_string(clt_sock));
 				}
 			}
 			else  {
