@@ -1,5 +1,6 @@
 #include "ben_afk.hpp"
 
+//http://web.archive.org/web/20070111091013/http://www.concentric.net/~Ttwang/tech/inthash.htm
 //http://burtleburtle.net/bob/hash/doobs.html
 unsigned long gen_seed(unsigned long a, unsigned long b, unsigned long c)
 {

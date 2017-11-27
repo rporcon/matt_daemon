@@ -57,7 +57,7 @@ void	get_args(t_opt *opt, int ac, char **av)
 				}
 				exit(1);
 			default:
-				printf("default");
+				break ;
 		}
 	}
 }

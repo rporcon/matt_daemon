@@ -29,7 +29,7 @@ void matt_daemon()
         exit(0);
 	}
     umask(0);
-    chdir("/");
+    chdir("/"); // verify with pwdx
 }
 
 int main(void) {
@@ -56,7 +56,6 @@ int main(void) {
 			sigaction(i, &sigact, NULL);
 		}
 	}
-	/* sigaction(SIGINT, &sigact, NULL); */
 
 	serv.server_create(4242);
 	serv.accept_clt_sock();
