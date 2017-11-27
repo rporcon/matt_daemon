@@ -34,24 +34,32 @@ Server &Server::operator=(Server const & rhs) {
 }
 
 
-void Server::pck_rcv(int *clt_sock, int *clean_fd)
+void Server::pck_rcv(int *clt_sock, int *clean_fd, int index_fd)
 {
 	char				buf[BUF_SIZE];
+	/* void				*msg = NULL; */
+	/* size_t				pck_len = 0; */
 	int					rcv_ret;
+	size_t				bn_pos;
 
-	// verif buf
 	bzero(buf, BUF_SIZE);
-	rcv_ret = recv(*clt_sock, buf, BUF_SIZE, 0);
 	/* printf("received: %sfrom fd %d (ret: %d)\n", buf, *clt_sock, rcv_ret); */
-	/* while ((rcv_ret = recv(clt_sock, buf, BUF_SIZE, 0)) > 0) { */
-	/* 	printf("received: %s\n", buf); */
-	/* } */
-	Tintin_reporter::getInstance().log("received: " + std::string(buf));
+	rcv_ret = recv(*clt_sock, buf, BUF_SIZE, 0);
+	this->client_msg[index_fd - 1] += std::string(std::string(buf).substr(
+		0, rcv_ret));
+	if ((bn_pos = this->client_msg[index_fd - 1].find('\n'))
+			!= std::string::npos) {
+		this->client_msg[index_fd - 1].erase(bn_pos, 1);
+		Tintin_reporter::getInstance().log("received: "
+				+ this->client_msg[index_fd - 1]);
+		this->client_msg[index_fd - 1].clear();
+	}
 
 	if (rcv_ret <= 0) {
 		/* printf("close fd: %d\n", *clt_sock); */
 		Tintin_reporter::getInstance().log("closed client socket "
 				+ std::to_string(*clt_sock));
+		this->client_msg[index_fd - 1].clear();
 		close(*clt_sock);
 		*clt_sock = -1;
 		*clean_fd = 1;
@@ -139,7 +147,7 @@ void Server::accept_clt_sock () {
 					}
 				}
 				else  {
-					this->pck_rcv(&pols[i].fd, &clean_fd);
+					this->pck_rcv(&pols[i].fd, &clean_fd, i);
 				}
 			}
 			if (clean_fd == 1) {
