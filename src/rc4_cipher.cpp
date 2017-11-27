@@ -12,7 +12,7 @@ void	swap(unsigned char *a, unsigned char *b)
 }
 
 // key max len: 256 bytes
-void	rc4_init(unsigned char *key, int keylen)
+void	rc4_init(const unsigned char *key, int keylen)
 {
 	unsigned char	t[256];
 	int				tmp = 0;
@@ -27,7 +27,7 @@ void	rc4_init(unsigned char *key, int keylen)
 	}
 }
 
-void	rc4(unsigned char *key, int keylen, char *data, size_t data_len)
+void	rc4(const unsigned char *key, int keylen, char *data, size_t data_len)
 {
 	rc4_init(key, keylen);
 	unsigned long t1 = 0;

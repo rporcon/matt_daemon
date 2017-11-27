@@ -23,12 +23,13 @@
 #include <netinet/in.h>
 #include <arpa/inet.h>
 #include <fcntl.h>
+#include <vector>
 #include "server.hpp"
 #include "logger.hpp"
 
 struct	t_pck_hdr {
 	uint64_t	size;
-	uint8_t		encrypted;
+	uint32_t	encrypted;
 };
 
 extern int	g_lock_fd;

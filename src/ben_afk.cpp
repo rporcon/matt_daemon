@@ -19,13 +19,32 @@ int		connect_to_daemon()
 	return (fd);
 }
 
-void	send_message(int fd, std::string message)
+void	send_message(int fd, std::string message, std::string key)
 {
-	int ret;
+	char		*data;
+	t_pck_hdr	hdr = {0, 0};
 
-	ret = send(fd, message.c_str(), message.length(), 0);
-	if (ret == -1)
+	data = new char[message.size() + sizeof(t_pck_hdr)];
+	memset(data, 0, message.size() + sizeof(t_pck_hdr));
+	hdr.size = message.length();
+	if (key.empty()) {
+		hdr.encrypted = 0;
+		memcpy(data, &hdr, sizeof(t_pck_hdr));
+		memcpy(data + sizeof(t_pck_hdr), message.c_str(), message.length());
+	} else {
+		hdr.encrypted = 1;
+		memcpy(data, &hdr, sizeof(t_pck_hdr));
+		char *message_enc = new char[message.size() + 1];
+		std::copy(message.begin(), message.end(), message_enc);
+		message_enc[message.size()] = '\0';
+		rc4(reinterpret_cast<const unsigned char *>(key.c_str()),
+			key.length(), message_enc, message.length());
+		memcpy(data + sizeof(t_pck_hdr), message_enc, message.length());
+		delete[] message_enc;
+	}
+	if (send(fd, data, message.length() + sizeof(t_pck_hdr), 0) == -1)
 		perr_exit("send");
+	delete[] data;
 }
 
 int		main(void)
@@ -37,7 +56,7 @@ int		main(void)
 	while (std::cin.good()){
 		std::cout << "$ ";
 		std::cin >> buffer;
-		send_message(fd, buffer);
+		send_message(fd, buffer, "");
 		if (buffer == "quit")
 			break ;
 	}
