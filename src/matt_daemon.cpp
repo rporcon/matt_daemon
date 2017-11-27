@@ -35,7 +35,6 @@ void matt_daemon()
 int main(void) {
 	Server				serv;
 	struct sigaction	sigact;
-	struct rlimit		rlim;
 
 	if (getuid() != 0) {
 		std::cerr << "Error: must be root" << std::endl;
@@ -52,11 +51,10 @@ int main(void) {
 
 	memset(&sigact, 0, sizeof sigact);
 	sigact.sa_handler = &close_server;
-	memset(&rlim, 0, sizeof rlim);
-	getrlimit(_NSIG, &rlim);
-	for (unsigned long i = 1; i < rlim.rlim_cur; i++) {
-		if (i != SIGCHLD && i != SIGHUP)
+	for (unsigned long i = 1; i < _NSIG; i++) {
+		if (i != SIGCHLD || i != SIGHUP || (i > 31 && i < 34)) {
 			sigaction(i, &sigact, NULL);
+		}
 	}
 	/* sigaction(SIGINT, &sigact, NULL); */
 

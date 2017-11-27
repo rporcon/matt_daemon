@@ -143,20 +143,22 @@ void Server::accept_clt_sock () {
 	}
 }
 
-void	close_server(int signum) {
-
+void	close_server(int signum)
+{
 	if (signum != 0) {
 		Tintin_reporter::getInstance().log("signal "
 				+ std::to_string(signum) + " received");
 	}
-	if (unlink("/var/lock/matt_daemon.lock") == -1)
-		perr_exit("unlink");
-	if (flock(g_lock_fd, LOCK_UN) == -1)
-		perr_exit("flock unlock");
-	if (close(g_lock_fd) == -1)
-		perr_exit("server fd close");
-	Tintin_reporter::getInstance().log("stopping daemon");
-	exit(0);
+	if (signum == SIGTERM || signum == SIGINT || signum == SIGQUIT) {
+		if (unlink("/var/lock/matt_daemon.lock") == -1)
+			perr_exit("unlink");
+		if (flock(g_lock_fd, LOCK_UN) == -1)
+			perr_exit("flock unlock");
+		if (close(g_lock_fd) == -1)
+			perr_exit("server fd close");
+		Tintin_reporter::getInstance().log("stopping daemon");
+		exit(0);
+	}
 }
 
 void	init_sigfd()
@@ -171,10 +173,11 @@ void	init_sigfd()
 	for (unsigned long i = 3; i < rlim.rlim_cur; i++) {
 		close(i);
 	}
-	getrlimit(_NSIG, &rlim);
-	for (unsigned long i = 1; i < rlim.rlim_cur; i++) {
-		sigact.sa_handler = SIG_DFL;
-		sigaction(i, &sigact, NULL);
+	for (unsigned long i = 1; i < _NSIG; i++) {
+		if (i > 31 && i < 34) {
+			sigact.sa_handler = SIG_DFL;
+			sigaction(i, &sigact, NULL);
+		}
 	}
 	sigemptyset(&sigset);
 	sigprocmask(SIG_SETMASK, &sigset, NULL);
