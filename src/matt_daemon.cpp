@@ -38,6 +38,7 @@ void matt_daemon()
 int main(void) {
 	Server				serv;
 	struct sigaction	sigact;
+	struct rlimit		rlim;
 
 	Server serv2(serv);
 	if (getuid() != 0) {
@@ -50,11 +51,17 @@ int main(void) {
 		perr_exit("flock lock");
 	}
 
-	memset(&sigact, 0, sizeof sigact);
 	Tintin_reporter::getInstance().log("starting daemon");
 	matt_daemon();
+
+	memset(&sigact, 0, sizeof sigact);
 	sigact.sa_handler = &close_server;
-	sigaction(SIGINT, &sigact, NULL);
+	memset(&rlim, 0, sizeof rlim);
+	getrlimit(_NSIG, &rlim);
+	for (unsigned long i = 0; i < rlim.rlim_cur; i++) {
+		sigaction(i, &sigact, NULL);
+	}
+	/* sigaction(SIGINT, &sigact, NULL); */
 
 	serv.server_create(4242);
 	serv.accept_clt_sock();
