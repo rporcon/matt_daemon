@@ -1,5 +1,3 @@
-#pragma once
-
 #include <iostream>
 #include <string>
 #include <ctime>
@@ -24,26 +22,10 @@
 #include <netinet/in.h>
 #include <arpa/inet.h>
 #include <fcntl.h>
+#include "server.hpp"
 #include "logger.hpp"
-
-using namespace std;
-
-# define BUF_SIZE 1024
-# define MAX_SOCK 4
 
 extern int	g_lock_fd;
 
-class Server {
-	int		sock;
-
-	public:
-		void server_create (int);
-		void accept_clt_sock (void);
-		void clean_fd(struct pollfd *, int, int *);
-		void pck_rcv(int *, int *);
-};
-
 void		err_exit(const char *err_msg);
 void		perr_exit(const char *str);
-void		init_sigfd();
-void		close_server(int signum);

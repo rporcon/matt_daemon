@@ -39,6 +39,7 @@ int main(void) {
 	Server				serv;
 	struct sigaction	sigact;
 
+	Server serv2(serv);
 	if (getuid() != 0) {
 		std::cerr << "Error: must be root" << std::endl;
 		exit(1);

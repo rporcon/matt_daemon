@@ -6,13 +6,33 @@
 /*   By: rporcon <rporcon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2017/08/19 19:07:53 by rporcon           #+#    #+#             */
-/*   Updated: 2017/11/26 17:58:33 by amathias         ###   ########.fr       */
+/*   Updated: 2017/11/27 10:20:47 by amathias         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "matt_daemon.hpp"
+#include "server.hpp"
 
 int g_lock_fd;
+
+Server::Server() {
+
+}
+
+Server::Server(Server const &src) {
+	*this = src;
+}
+
+Server::~Server() {
+
+}
+
+Server &Server::operator=(Server const & rhs) {
+	if (this != &rhs) {
+		this->sock = rhs.sock;
+	}
+	return (*this);
+}
+
 
 void Server::pck_rcv(int *clt_sock, int *clean_fd)
 {
