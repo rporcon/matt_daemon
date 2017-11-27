@@ -35,6 +35,7 @@ void matt_daemon()
 int main(void) {
 	Server				serv;
 	struct sigaction	sigact;
+	struct rlimit		rlim;
 
 	if (getuid() != 0) {
 		std::cerr << "Error: must be root" << std::endl;
@@ -46,11 +47,18 @@ int main(void) {
 		perr_exit("flock lock");
 	}
 
-	memset(&sigact, 0, sizeof sigact);
 	Tintin_reporter::getInstance().log("starting daemon");
 	matt_daemon();
+
+	memset(&sigact, 0, sizeof sigact);
 	sigact.sa_handler = &close_server;
-	sigaction(SIGINT, &sigact, NULL);
+	memset(&rlim, 0, sizeof rlim);
+	getrlimit(_NSIG, &rlim);
+	for (unsigned long i = 1; i < rlim.rlim_cur; i++) {
+		if (i != SIGCHLD && i != SIGHUP)
+			sigaction(i, &sigact, NULL);
+	}
+	/* sigaction(SIGINT, &sigact, NULL); */
 
 	serv.server_create(4242);
 	serv.accept_clt_sock();

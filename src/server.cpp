@@ -179,7 +179,7 @@ void	init_sigfd()
 		close(i);
 	}
 	getrlimit(_NSIG, &rlim);
-	for (unsigned long i = 0; i < rlim.rlim_cur; i++) {
+	for (unsigned long i = 1; i < rlim.rlim_cur; i++) {
 		sigact.sa_handler = SIG_DFL;
 		sigaction(i, &sigact, NULL);
 	}
