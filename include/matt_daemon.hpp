@@ -1,3 +1,4 @@
+#pragma once
 #include <iostream>
 #include <string>
 #include <ctime>
@@ -25,12 +26,12 @@
 #include "server.hpp"
 #include "logger.hpp"
 
+struct	t_pck_hdr {
+	uint64_t	size;
+	uint8_t		encrypted;
+};
+
 extern int	g_lock_fd;
 
 void		err_exit(const char *err_msg);
 void		perr_exit(const char *str);
-
-/* typedef struct	s_pck_hdr { */
-/* 	uint64_t	size; */
-/* 	uint8_t		encrypted; */
-/* }				t_pck_hdr; */
