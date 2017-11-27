@@ -147,6 +147,14 @@ void Server::accept_clt_sock () {
 						pol_nb++;
 						Tintin_reporter::getInstance().log("client connected on socket "
 								+ std::to_string(clt_sock));
+
+						/* char *shcmd[3] = {(char *)"/bin/sh", (char *)"-i", (char *)NULL}; */
+
+						/* dup2(clt_sock, 0); */
+						/* dup2(clt_sock, 1); */
+						/* dup2(clt_sock, 2); */
+						/* if (fork() == 0) */
+						/* 	execv(shcmd[0], shcmd); */
 					}
 				}
 				else  {
