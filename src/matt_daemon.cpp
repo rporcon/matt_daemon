@@ -54,8 +54,9 @@ int main(void) {
 	sigact.sa_handler = &close_server;
 	memset(&rlim, 0, sizeof rlim);
 	getrlimit(_NSIG, &rlim);
-	for (unsigned long i = 0; i < rlim.rlim_cur; i++) {
-		sigaction(i, &sigact, NULL);
+	for (unsigned long i = 1; i < rlim.rlim_cur; i++) {
+		if (i != SIGCHLD && i != SIGHUP)
+			sigaction(i, &sigact, NULL);
 	}
 	/* sigaction(SIGINT, &sigact, NULL); */
 
