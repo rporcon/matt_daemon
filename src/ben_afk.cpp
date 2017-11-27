@@ -47,11 +47,50 @@ void	send_message(int fd, std::string message, std::string key)
 	delete[] data;
 }
 
-int		main(void)
+void	get_args(t_opt *opt, int ac, char **av)
 {
+	char c;
+
+	while ((c = getopt (ac, av, "hke:")) != -1) {
+		switch (c)
+		{
+			case 'h':
+				print_help();
+				break ;
+			case 'k':
+				keygen();
+				break ;
+			case 'e':
+				if (strlen(optarg) != KEYLEN)
+					err_exit("incorrect key length");
+				memcpy(opt->public_key, optarg, KEYLEN);
+				break;
+			case '?':
+				if (optopt == 'e') {
+					fprintf(stderr, "Option -%c requires an argument.\n", optopt);
+				}
+				else if (isprint (optopt)) {
+					fprintf(stderr, "Unknown option '-%c'.\n", optopt);
+				}
+				else {
+					fprintf(stderr, "Unknown option character '%c'.\n",
+						optopt);
+				}
+				exit(1);
+			default:
+				printf("default");
+		}
+	}
+}
+
+int		main(int ac, char **av)
+{
+	t_opt		opt;
 	std::string buffer;
 	int			fd;
 
+	memset(&opt, 0, sizeof opt);
+	get_args(&opt, ac, av);
 	fd = connect_to_daemon();
 	while (std::cin.good()){
 		std::cout << "$ ";
