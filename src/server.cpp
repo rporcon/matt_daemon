@@ -6,7 +6,7 @@
 /*   By: rporcon <rporcon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2017/08/19 19:07:53 by rporcon           #+#    #+#             */
-/*   Updated: 2017/11/27 11:28:39 by amathias         ###   ########.fr       */
+/*   Updated: 2017/11/27 11:35:24 by amathias         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -144,11 +144,10 @@ void Server::accept_clt_sock () {
 }
 
 void	close_server(int signum) {
-	std::stringstream ss;
 
 	if (signum != 0) {
-		ss << signum;
-		Tintin_reporter::getInstance().log("signal " + ss.str() + " received");
+		Tintin_reporter::getInstance().log("signal "
+				+ std::to_string(signum) + " received");
 	}
 	if (unlink("/var/lock/matt_daemon.lock") == -1)
 		perr_exit("unlink");
