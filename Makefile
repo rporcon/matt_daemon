@@ -11,7 +11,7 @@ SRC_MATT = $(addprefix $(SRCS_DIR), $(SRC_FILE_MATT))
 OBJ_MATT = $(SRC_MATT:%.cpp=%.o)
 
 
-SRC_FILE_BEN = ben_afk.cpp utils.cpp keygen.cpp
+SRC_FILE_BEN = ben_afk.cpp utils.cpp keygen.cpp rc4_cipher.cpp
 
 SRC_BEN = $(addprefix $(SRCS_DIR), $(SRC_FILE_BEN))
 

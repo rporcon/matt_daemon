@@ -6,7 +6,7 @@
 /*   By: rporcon <rporcon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2017/08/19 19:07:53 by rporcon           #+#    #+#             */
-/*   Updated: 2017/11/27 11:49:03 by amathias         ###   ########.fr       */
+/*   Updated: 2017/11/27 23:14:44 by amathias         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -33,26 +33,33 @@ Server &Server::operator=(Server const & rhs) {
 	return (*this);
 }
 
-
 void Server::pck_rcv(int *clt_sock, int *clean_fd, int index_fd)
 {
-	char				buf[BUF_SIZE];
+	t_pck_hdr			pck_hdr = {0, 0};
+	char				buf[BUF_SIZE] = {0};
 	/* void				*msg = NULL; */
 	/* size_t				pck_len = 0; */
 	int					rcv_ret;
-	size_t				bn_pos;
+	/* size_t				bn_pos; */
 
-	bzero(buf, BUF_SIZE);
-	/* printf("received: %sfrom fd %d (ret: %d)\n", buf, *clt_sock, rcv_ret); */
 	rcv_ret = recv(*clt_sock, buf, BUF_SIZE, 0);
-	this->client_msg[index_fd - 1] += std::string(std::string(buf).substr(
-		0, rcv_ret));
-	if ((bn_pos = this->client_msg[index_fd - 1].find('\n'))
-			!= std::string::npos) {
-		this->client_msg[index_fd - 1].erase(bn_pos, 1);
-		Tintin_reporter::getInstance().log("received: "
-				+ this->client_msg[index_fd - 1]);
-		this->client_msg[index_fd - 1].clear();
+	for (int i = 0; i < rcv_ret; i++) {
+		this->client_msg[index_fd - 1].push_back(buf[i]);
+	}
+	if (this->client_msg[index_fd - 1].size() > sizeof(t_pck_hdr)) {
+		memcpy(&pck_hdr, this->client_msg[index_fd - 1].data(), sizeof(t_pck_hdr));
+		if (this->client_msg[index_fd - 1].size()
+				>= pck_hdr.size + sizeof(t_pck_hdr)) {
+			/* this->client_msg[index_fd - 1].erase(bn_pos, 1); */
+			std::string message =
+				std::string(client_msg[index_fd - 1].begin() + sizeof(t_pck_hdr),
+						client_msg[index_fd - 1].end());
+			Tintin_reporter::getInstance().log("received: " + message);
+			if (std::string(message).compare("quit") == 0) {
+				close_server(0);
+			}
+			this->client_msg[index_fd - 1].clear();
+		}
 	}
 
 	if (rcv_ret <= 0) {
@@ -63,10 +70,6 @@ void Server::pck_rcv(int *clt_sock, int *clean_fd, int index_fd)
 		close(*clt_sock);
 		*clt_sock = -1;
 		*clean_fd = 1;
-	}
-	if (std::string(buf).compare("quit") == 0) {
-		// Close daemon
-		close_server(0);
 	}
 }
 

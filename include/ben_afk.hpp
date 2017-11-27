@@ -10,9 +10,16 @@
 #include <string.h>
 #include <string>
 #include <iostream>
+#include <unistd.h>
 #include <random>
-
+#include <string.h>
 # define KEYLEN 32
+
+struct	t_pck_hdr {
+	uint64_t	size;
+	uint32_t	encrypted;
+};
+
 
 typedef struct	g_opt {
 	char		public_key[KEYLEN];
@@ -21,6 +28,6 @@ typedef struct	g_opt {
 void		err_exit(const char *err_msg);
 void		perr_exit(const char *str);
 void		print_help(void);
-void		rc4(unsigned char *key, int keylen,
+void		rc4(const unsigned char *key, int keylen,
 				char *data, size_t data_len);
 void		keygen(void);
