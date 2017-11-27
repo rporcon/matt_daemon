@@ -21,3 +21,5 @@ class Server {
 
 void		init_sigfd();
 void		close_server(int signum);
+void		rc4(unsigned char *key, int keylen,
+				char *data, size_t data_len);
