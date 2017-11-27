@@ -9,7 +9,6 @@ void matt_daemon()
     pid = fork();
     if (pid < 0) {
 		close_server(0);
-        exit(1);
 	}
     if (pid > 0) {
         exit(0);
@@ -17,7 +16,6 @@ void matt_daemon()
 
     if (setsid() < 0) {
 		close_server(0);
-    	exit(1);
 	}
 	sigact.sa_handler = SIG_IGN;
 	sigaction(SIGCHLD, &sigact, NULL);
@@ -26,7 +24,6 @@ void matt_daemon()
     pid = fork();
     if (pid < 0) {
 		close_server(0);
-        exit(1);
 	}
     if (pid > 0) {
         exit(0);
@@ -40,7 +37,6 @@ int main(void) {
 	struct sigaction	sigact;
 	struct rlimit		rlim;
 
-	Server serv2(serv);
 	if (getuid() != 0) {
 		std::cerr << "Error: must be root" << std::endl;
 		exit(1);
