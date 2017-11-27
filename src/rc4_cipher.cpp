@@ -1,4 +1,4 @@
-#include "matt_daemon.cpp"
+#include "matt_daemon.hpp"
 
 unsigned char	s[256];
 
