@@ -39,6 +39,7 @@ void Server::pck_rcv(int *clt_sock, int *clean_fd)
 	char				buf[BUF_SIZE];
 	int					rcv_ret;
 
+	// verif buf
 	bzero(buf, BUF_SIZE);
 	rcv_ret = recv(*clt_sock, buf, BUF_SIZE, 0);
 	/* printf("received: %sfrom fd %d (ret: %d)\n", buf, *clt_sock, rcv_ret); */
@@ -111,42 +112,41 @@ void Server::accept_clt_sock () {
 	pols[0].revents = 0;
 	while (1)
 	{
-		if (poll(pols, pol_nb, 100) < 0)
-			perr_exit("poll");
-
-		pol_size = pol_nb;
-		for (int i = 0; i < pol_size; i++) {
-			if (pols[i].revents == 0) {
-				continue ;
-			}
-			if (pols[i].fd == this->sock) {
-				if ((clt_sock = accept(this->sock, NULL, NULL)) < 0) {
-					perr_exit("accept");
+		if (poll(pols, pol_nb, 100) != -1) {
+			pol_size = pol_nb;
+			for (int i = 0; i < pol_size; i++) {
+				if (pols[i].revents == 0) {
+					continue ;
 				}
-				Tintin_reporter::getInstance().log(
-						"attempt to connect on socket " + std::to_string(clt_sock));
-				if (pol_nb == MAX_SOCK) {
-					close(clt_sock);
-					Tintin_reporter::getInstance().log("closed client socket "
-							+ std::to_string(clt_sock));
+				if (pols[i].fd == this->sock) {
+					if ((clt_sock = accept(this->sock, NULL, NULL)) < 0) {
+						perr_exit("accept");
+					}
+					Tintin_reporter::getInstance().log(
+							"attempt to connect on socket " + std::to_string(clt_sock));
+					if (pol_nb == MAX_SOCK) {
+						close(clt_sock);
+						Tintin_reporter::getInstance().log("closed client socket "
+								+ std::to_string(clt_sock));
+					}
+					else {
+						pols[pol_nb].fd = clt_sock;
+						pols[pol_nb].events = POLLIN;
+						pols[pol_nb].revents = 0;
+						pol_nb++;
+						Tintin_reporter::getInstance().log("client connected on socket "
+								+ std::to_string(clt_sock));
+					}
 				}
-				else {
-					pols[pol_nb].fd = clt_sock;
-					pols[pol_nb].events = POLLIN;
-					pols[pol_nb].revents = 0;
-					pol_nb++;
-					Tintin_reporter::getInstance().log("client connected on socket "
-							+ std::to_string(clt_sock));
+				else  {
+					this->pck_rcv(&pols[i].fd, &clean_fd);
 				}
 			}
-			else  {
-				this->pck_rcv(&pols[i].fd, &clean_fd);
+			if (clean_fd == 1) {
+				this->clean_fd(pols, pol_size, &pol_nb);
+				clean_fd = 0;
 			}
-		}
-		if (clean_fd == 1) {
-			this->clean_fd(pols, pol_size, &pol_nb);
-			clean_fd = 0;
-		}
+		};
 	}
 }
 
@@ -171,13 +171,10 @@ void	close_server(int signum)
 void	init_sigfd()
 {
 	struct sigaction	sigact;
-	struct rlimit		rlim;
 	sigset_t			sigset;
 
 	memset(&sigact, 0, sizeof sigact);
-	memset(&rlim, 0, sizeof rlim);
-	getrlimit(RLIMIT_NOFILE, &rlim);
-	for (unsigned long i = 3; i < rlim.rlim_cur; i++) {
+	for (long i = 3; i < sysconf(_SC_OPEN_MAX); i++) {
 		close(i);
 	}
 	for (unsigned long i = 1; i < _NSIG; i++) {
