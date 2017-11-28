@@ -14,7 +14,7 @@ class Server {
 		void accept_clt_sock (void);
 		void clean_fd(struct pollfd *, int, int *);
 		void pck_rcv(int *, int *, int);
-		void pck_wrt(int *clt_sock, int *clean_fd, int index_fd);
+		void pck_wrt(int, int);
 	private:
 		int							sock;
 		std::vector<char>			client_msg[MAX_SOCK - 1];
