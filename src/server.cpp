@@ -32,42 +32,48 @@ Server &Server::operator=(Server const & rhs) {
 	}
 	return (*this);
 }
-void Server::pck_wrt(int *clt_sock, int *clean_fd, int index_fd) {
+void Server::pck_wrt(int clt_sock, int index_fd) {
+	int		send_ret; 
 
+	if (this->logs[index_fd].empty() == false) {
+		send_ret = send(clt_sock, this->logs[index_fd][0].data(),
+				this->logs[index_fd][0].size(), 0);
+		this->logs[index_fd][0].erase(0, send_ret);
+		if (this->logs[index_fd][0].empty() == true) {
+			this->logs[index_fd].erase(this->logs[index_fd].begin());
+		}
+	}
 }
 
 void Server::pck_rcv(int *clt_sock, int *clean_fd, int index_fd)
 {
 	t_pck_hdr			pck_hdr = {0, 0, 0};
 	char				buf[BUF_SIZE] = {0};
-	/* void				*msg = NULL; */
-	/* size_t				pck_len = 0; */
 	int					rcv_ret;
-	/* size_t				bn_pos; */
 
 	rcv_ret = recv(*clt_sock, buf, BUF_SIZE, 0);
 	for (int i = 0; i < rcv_ret; i++) {
-		this->client_msg[index_fd - 1].push_back(buf[i]);
+		this->client_msg[index_fd].push_back(buf[i]);
 	}
-	memcpy(&pck_hdr, this->client_msg[index_fd - 1].data(),
-			std::min(sizeof(t_pck_hdr), this->client_msg[index_fd - 1].size()));
+	memcpy(&pck_hdr, this->client_msg[index_fd].data(),
+			std::min(sizeof(t_pck_hdr), this->client_msg[index_fd].size()));
 	if (pck_hdr.secret == 0x42244224) {
-		if (this->client_msg[index_fd - 1].size()
-				>=pck_hdr.size + sizeof(t_pck_hdr)) {
+		if (this->client_msg[index_fd].size()
+				>= pck_hdr.size + sizeof(t_pck_hdr)) {
 			std::string message =
-				std::string(client_msg[index_fd - 1].begin() + sizeof(t_pck_hdr),
-						client_msg[index_fd - 1].end());
+				std::string(client_msg[index_fd].begin() + sizeof(t_pck_hdr),
+						client_msg[index_fd].end());
 			Tintin_reporter::getInstance().log("received: " + message);
 			if (std::string(message).compare("quit") == 0) {
 				close_server(-1);
 			} else if (std::string(message).compare("getlog") == 0) {
-				this->logs[index_fd - 1] = Tintin_reporter::getInstance().get_logs();
+				this->logs[index_fd] = Tintin_reporter::getInstance().get_logs();
 			}
-			this->client_msg[index_fd - 1].clear();
+			this->client_msg[index_fd].clear();
 		}
 	} else {
 		bool bs = false;
-		for (auto c : this->client_msg[index_fd - 1]) {
+		for (auto c : this->client_msg[index_fd]) {
 			if (c == '\n') {
 				bs = true;
 				break ;
@@ -75,14 +81,14 @@ void Server::pck_rcv(int *clt_sock, int *clean_fd, int index_fd)
 		}
 		if (bs) {
 			std::string message =
-				std::string(client_msg[index_fd - 1].begin(),
-						client_msg[index_fd - 1].end());
+				std::string(client_msg[index_fd].begin(),
+						client_msg[index_fd].end());
 			message.erase(message.find_last_of('\n'), 1);
 			Tintin_reporter::getInstance().log("received: " + message);
 			if (std::string(message).compare("quit") == 0) {
 				close_server(-1);
 			}
-			this->client_msg[index_fd - 1].clear();
+			this->client_msg[index_fd].clear();
 		}
 	}
 
@@ -90,7 +96,7 @@ void Server::pck_rcv(int *clt_sock, int *clean_fd, int index_fd)
 		/* printf("close fd: %d\n", *clt_sock); */
 		Tintin_reporter::getInstance().log("closed client socket "
 				+ std::to_string(*clt_sock));
-		this->client_msg[index_fd - 1].clear();
+		this->client_msg[index_fd].clear();
 		close(*clt_sock);
 		*clt_sock = -1;
 		*clean_fd = 1;
@@ -182,9 +188,9 @@ void Server::accept_clt_sock () {
 					}
 				}
 				else if (pols[i].revents & POLLIN) {
-					this->pck_rcv(&pols[i].fd, &clean_fd, i);
+					this->pck_rcv(&pols[i].fd, &clean_fd, i - 1);
 				} else {
-					this->pck_wrt(&pols[i].fd, &clean_fd, i);
+					this->pck_wrt(pols[i].fd, i - 1);
 				}
 			}
 			if (clean_fd == 1) {
