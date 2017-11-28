@@ -49,17 +49,44 @@ void	send_message(int fd, std::string message, std::string key)
 	delete[] data;
 }
 
-int 	receive_message(int fd, std::string key) {
+/* void	process_message(t_opt *opt,) { */
+
+/* } */
+
+int 	receive_message(t_opt *opt, int fd, std::string key) {
+	t_pck_hdr			pck_hdr = {0, 0, 0};
 	std::string message;
 	char buf[BUF_SIZE];
 	int rcv_ret;
 
 	(void)key;
+	(void)opt;
 	rcv_ret = recv(fd, buf, BUF_SIZE, 0);
+	/* for (int i = 0; i < rcv_ret; i++) { */
+	/* 	opt->log_content.push_back(buf[i]); */
+	/* } */
 	if (rcv_ret > 0) {
 		message = std::string(buf, rcv_ret);
-		if (message.compare("exit\n") == 0)
+		for (unsigned int i = 0; i < message.length(); i++) {
+			memset(&pck_hdr, 0, sizeof(t_pck_hdr));
+			memcpy(&pck_hdr, &message[i],
+			std::min(sizeof(t_pck_hdr), message.length() - i));
+			if (pck_hdr.secret == 0x42244224) {
+				/* char *message_enc = new char[(message.size() + 1) - i]; */
+				/* std::copy(message.begin() + i, message.end(), message_enc); */
+				/* message_enc[message.size() - i] = '\0'; */
+				/* rc4(reinterpret_cast<const unsigned char *>(key.c_str()), */
+				/* 	key.length(), message_enc, message.length() - 1); */
+				/* //memcpy(data + sizeof(t_pck_hdr), message_enc, message.length()); */
+				/* std::cout << message_enc << std::endl; */
+				/* delete[] message_enc; */
+			}
+		}
+		size_t pos;
+		if ((pos = message.find("logexit\n")) != std::string::npos) {
+			std::cout << message.erase(pos);
 			exit(0);
+		}
 		std::cout << message;
 	} else if (rcv_ret <= 0){
 		// Server down ?
@@ -122,7 +149,7 @@ int		main(int ac, char **av)
 	if (opt.flag_getlog) {
 		send_message(fd, "getlog", std::string(opt.public_key));
 		while (1) {
-			receive_message(fd, std::string(opt.public_key));
+			receive_message(&opt, fd, std::string(opt.public_key));
 		}
 	} else {
 		while (std::cin.good()){

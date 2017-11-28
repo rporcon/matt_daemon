@@ -6,7 +6,7 @@
 /*   By: rporcon <rporcon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2017/08/19 19:07:53 by rporcon           #+#    #+#             */
-/*   Updated: 2017/11/28 14:37:32 by amathias         ###   ########.fr       */
+/*   Updated: 2017/11/28 15:59:48 by amathias         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -61,9 +61,14 @@ void Server::pck_rcv(int *clt_sock, int *clean_fd, int index_fd)
 	if (pck_hdr.secret == 0x42244224) {
 		if (this->client_msg[index_fd].size()
 				>= pck_hdr.size + sizeof(t_pck_hdr)) {
-			std::string message =
-				std::string(client_msg[index_fd].begin() + sizeof(t_pck_hdr),
+			std::string message;
+			if (pck_hdr.encrypted) {
+				message = std::string(client_msg[index_fd].begin(),
 						client_msg[index_fd].end());
+			} else {
+				message = std::string(client_msg[index_fd].begin()
+					+ sizeof(t_pck_hdr), client_msg[index_fd].end());
+			}
 			Tintin_reporter::getInstance().log("received: " + message);
 			if (std::string(message).compare("quit") == 0) {
 				close_server(-1);
