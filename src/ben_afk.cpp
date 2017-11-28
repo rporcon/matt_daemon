@@ -53,45 +53,47 @@ void	send_message(int fd, std::string message, std::string key)
 	delete[] data;
 }
 
-/* void	process_message(t_opt *opt,) { */
+void	process_logs(t_opt *opt, std::string key) {
+	std::string			output;
+	t_pck_hdr			pck_hdr = {0, 0, 0, 0};
 
-/* } */
+	for (unsigned int i = 0; i < opt->log_content.size(); i++) {
+		memset(&pck_hdr, 0, sizeof(t_pck_hdr));
+		memcpy(&pck_hdr, &opt->log_content[i],
+			std::min(sizeof(t_pck_hdr), opt->log_content.size() - i));
+		if (pck_hdr.secret == 0x42244224) {
+			char *message_enc = new char[(pck_hdr.size + 1)];
+			std::copy(opt->log_content.begin() + i,
+					opt->log_content.begin() + i + pck_hdr.size, message_enc);
+			message_enc[pck_hdr.size] = '\0';
+			rc4(reinterpret_cast<const unsigned char *>(key.c_str()),
+				key.length(), message_enc, pck_hdr.size);
+			output += std::string(message_enc);
+			delete[] message_enc;
+			i += pck_hdr.size;
+		} else {
+			output += opt->log_content[i];
+		}
+	}
+	std::cout << output << std::endl;
+}
 
 int 	receive_message(t_opt *opt, int fd, std::string key) {
-	t_pck_hdr			pck_hdr = {0, 0, 0};
-	std::string message;
-	char buf[BUF_SIZE];
-	int rcv_ret;
+	std::string	message;
+	char		buf[BUF_SIZE];
+	int			rcv_ret;
+	size_t		pos;
 
-	(void)key;
-	(void)opt;
 	rcv_ret = recv(fd, buf, BUF_SIZE, 0);
-	/* for (int i = 0; i < rcv_ret; i++) { */
-	/* 	opt->log_content.push_back(buf[i]); */
-	/* } */
+	for (int i = 0; i < rcv_ret; i++) {
+		opt->log_content.push_back(buf[i]);
+	}
 	if (rcv_ret > 0) {
 		message = std::string(buf, rcv_ret);
-		for (unsigned int i = 0; i < message.length(); i++) {
-			memset(&pck_hdr, 0, sizeof(t_pck_hdr));
-			memcpy(&pck_hdr, &message[i],
-			std::min(sizeof(t_pck_hdr), message.length() - i));
-			if (pck_hdr.secret == 0x42244224) {
-				/* char *message_enc = new char[(message.size() + 1) - i]; */
-				/* std::copy(message.begin() + i, message.end(), message_enc); */
-				/* message_enc[message.size() - i] = '\0'; */
-				/* rc4(reinterpret_cast<const unsigned char *>(key.c_str()), */
-				/* 	key.length(), message_enc, message.length() - 1); */
-				/* //memcpy(data + sizeof(t_pck_hdr), message_enc, message.length()); */
-				/* std::cout << message_enc << std::endl; */
-				/* delete[] message_enc; */
-			}
-		}
-		size_t pos;
 		if ((pos = message.find("logexit\n")) != std::string::npos) {
-			std::cout << message.erase(pos);
+			process_logs(opt, key);
 			exit(0);
 		}
-		std::cout << message;
 	} else if (rcv_ret <= 0){
 		// Server down ?
 		exit(0);
