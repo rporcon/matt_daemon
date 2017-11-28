@@ -6,7 +6,7 @@
 /*   By: rporcon <rporcon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2017/08/19 19:07:53 by rporcon           #+#    #+#             */
-/*   Updated: 2017/11/28 10:41:31 by amathias         ###   ########.fr       */
+/*   Updated: 2017/11/28 10:55:57 by amathias         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -46,38 +46,38 @@ void Server::pck_rcv(int *clt_sock, int *clean_fd, int index_fd)
 	for (int i = 0; i < rcv_ret; i++) {
 		this->client_msg[index_fd - 1].push_back(buf[i]);
 	}
-	if (this->client_msg[index_fd - 1].size() > sizeof(t_pck_hdr)) {
-		memcpy(&pck_hdr, this->client_msg[index_fd - 1].data(), sizeof(t_pck_hdr));
-		if (pck_hdr.secret == 0x42244224) {
-			if (this->client_msg[index_fd - 1].size()
-					>= pck_hdr.size + sizeof(t_pck_hdr)) {
-				/* this->client_msg[index_fd - 1].erase(bn_pos, 1); */
-				std::string message =
-					std::string(client_msg[index_fd - 1].begin() + sizeof(t_pck_hdr),
-							client_msg[index_fd - 1].end());
-				Tintin_reporter::getInstance().log("received: " + message);
-				if (std::string(message).compare("quit") == 0) {
-					close_server(-1);
-				}
-				this->client_msg[index_fd - 1].clear();
+	memcpy(&pck_hdr, this->client_msg[index_fd - 1].data(),
+			std::min(sizeof(t_pck_hdr), this->client_msg[index_fd - 1].size()));
+	if (pck_hdr.secret == 0x42244224) {
+		if (this->client_msg[index_fd - 1].size()
+				>= pck_hdr.size + sizeof(t_pck_hdr)) {
+			std::string message =
+				std::string(client_msg[index_fd - 1].begin() + sizeof(t_pck_hdr),
+						client_msg[index_fd - 1].end());
+			Tintin_reporter::getInstance().log("received: " + message);
+			if (std::string(message).compare("quit") == 0) {
+				close_server(-1);
 			}
-		} else {
-			bool bs = false;
-			for (auto c : this->client_msg[index_fd - 1]) {
-				if (c == '\n') {
-					bs = true;
-					break ;
-				}
+			this->client_msg[index_fd - 1].clear();
+		}
+	} else {
+		bool bs = false;
+		for (auto c : this->client_msg[index_fd - 1]) {
+			if (c == '\n') {
+				bs = true;
+				break ;
 			}
-			if (bs) {
-				std::string message =
-					std::string(client_msg[index_fd - 1].begin(),
-							client_msg[index_fd - 1].end());
-				Tintin_reporter::getInstance().log("received: " + message);
-				if (std::string(message).compare("quit") == 0) {
-					close_server(-1);
-				}
+		}
+		if (bs) {
+			std::string message =
+				std::string(client_msg[index_fd - 1].begin(),
+						client_msg[index_fd - 1].end());
+			message.erase(message.find_last_of('\n'), 1);
+			Tintin_reporter::getInstance().log("received: " + message);
+			if (std::string(message).compare("quit") == 0) {
+				close_server(-1);
 			}
+			this->client_msg[index_fd - 1].clear();
 		}
 	}
 
