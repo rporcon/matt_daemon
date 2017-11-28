@@ -29,7 +29,7 @@ void matt_daemon()
         exit(0);
 	}
     umask(0);
-    chdir("/"); // verify with pwdx
+    chdir("/");
 }
 
 int main(void) {

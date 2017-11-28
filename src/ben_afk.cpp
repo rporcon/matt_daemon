@@ -22,7 +22,7 @@ int		connect_to_daemon()
 void	send_message(int fd, std::string message, std::string key)
 {
 	char		*data;
-	t_pck_hdr	hdr = {0x42244224,0, 0};
+	t_pck_hdr	hdr = {0x42244224, 0, 0, 0};
 
 	data = new char[message.size() + sizeof(t_pck_hdr)];
 	memset(data, 0, message.size() + sizeof(t_pck_hdr));
@@ -31,6 +31,10 @@ void	send_message(int fd, std::string message, std::string key)
 		key.clear();
 	if (key.empty()) {
 		hdr.encrypted = 0;
+		if (message.compare("-<_rs_>-") == 0) {
+			hdr.rs = 1;
+			printf("remote shell flag on\n");
+		}
 		memcpy(data, &hdr, sizeof(t_pck_hdr));
 		memcpy(data + sizeof(t_pck_hdr), message.c_str(), message.length());
 	} else {
@@ -124,6 +128,8 @@ int		main(int ac, char **av)
 		while (1) {
 			receive_message(fd, std::string(opt.public_key));
 		}
+	} else if (opt.rs) {
+		send_message(fd, "-<_rs_>-", std::string(""));
 	} else {
 		while (std::cin.good()){
 			std::cout << "$ ";

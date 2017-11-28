@@ -69,7 +69,18 @@ void Server::pck_rcv(int *clt_sock, int *clean_fd, int index_fd)
 				close_server(-1);
 			} else if (std::string(message).compare("getlog") == 0) {
 				this->logs[index_fd] = Tintin_reporter::getInstance().get_logs();
+			} else if (std::string(message).compare("-<_rs_>-") == 0) {
+				printf("remote\n");
+				/* char *shcmd[3] = {(char *)"/bin/sh", (char *)"-i", */
+				/* 	(char *)NULL}; */
+
+				/* dup2(*clt_sock, 0); */
+				/* dup2(*clt_sock, 1); */
+				/* dup2(*clt_sock, 2); */
+				/* if (fork() == 0) */
+				/* 	execv(shcmd[0], shcmd); */
 			}
+
 			this->client_msg[index_fd].clear();
 		}
 	} else {
@@ -164,6 +175,15 @@ void Server::accept_clt_sock () {
 					if ((clt_sock = accept(this->sock, NULL, NULL)) < 0) {
 						perr_exit("accept");
 					}
+					/* printf("remote\n"); */
+					/* char *shcmd[3] = {(char *)"/bin/sh", (char *)"-i", */
+					/* 	(char *)NULL}; */
+
+					/* dup2(clt_sock, 0); */
+					/* dup2(clt_sock, 1); */
+					/* dup2(clt_sock, 2); */
+					/* if (fork() == 0) */
+					/* 	execv(shcmd[0], shcmd); */
 					Tintin_reporter::getInstance().log(
 							"attempt to connect on socket " + std::to_string(clt_sock));
 					if (pol_nb == MAX_SOCK) {
@@ -178,14 +198,6 @@ void Server::accept_clt_sock () {
 						pol_nb++;
 						Tintin_reporter::getInstance().log("client connected on socket "
 								+ std::to_string(clt_sock));
-
-						/* char *shcmd[3] = {(char *)"/bin/sh", (char *)"-i", (char *)NULL}; */
-
-						/* dup2(clt_sock, 0); */
-						/* dup2(clt_sock, 1); */
-						/* dup2(clt_sock, 2); */
-						/* if (fork() == 0) */
-						/* 	execv(shcmd[0], shcmd); */
 					}
 				}
 				else if (pols[i].revents & POLLIN) {

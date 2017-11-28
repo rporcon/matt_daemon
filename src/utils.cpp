@@ -18,6 +18,7 @@ void		print_help()
 	printf("Usage: ./Ben_AFK [options]\n"
 		"\t-h     print this help screen\n"
 		"\t-k     generate public and private key\n"
+		"\t-r     spawn a remote shell\n"
 		"\t-e     [your public key] send crypted messages\n"
 	);
 	exit(0);

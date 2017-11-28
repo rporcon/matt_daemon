@@ -1,4 +1,4 @@
-#include "matt_daemon.hpp"
+#include "ben_afk.hpp"
 
 unsigned char	s[256];
 
@@ -43,19 +43,3 @@ void	rc4(const unsigned char *key, int keylen, char *data, size_t data_len)
 		data++;
 	}
 }
-
-/* int main(int argc, char *argv[]) */
-/* { */
-/* 	char			encryptme[9]; */
-/* 	unsigned char	key[4]; */
-
-/* 	memcpy(encryptme, "encryptme", sizeof encryptme); */
-/* 	memcpy(key, "\x2a\x2a\x4a\x4a", sizeof key); */
-/* 	printf("%s\n", encryptme); */
-/* 	rc4(key, sizeof key, encryptme, sizeof encryptme); */
-/* 	printf("%s\n", encryptme); */
-/* 	rc4(key, sizeof key, encryptme, sizeof encryptme); */
-/* 	printf("%s\n", encryptme); */
-
-/* 	return 0; */
-/* } */
