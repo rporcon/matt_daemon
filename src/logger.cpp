@@ -62,7 +62,9 @@ std::vector<std::string>	Tintin_reporter::get_logs() {
 	for (std::string line; std::getline(ifs, line);) {
 		logs.push_back(line);
 	}
-	logs.push_back("exit");
+	ifs.close();
+	logs.push_back("logexit");
+	ifs.close();
 	return (logs);
 }
 

@@ -20,6 +20,8 @@ void		print_help()
 		"\t-k     generate public and private key\n"
 		"\t-r     spawn a remote shell\n"
 		"\t-e     [your public key] send crypted messages\n"
+		"\t-e     [your key] send/received crypted messages\n"
+		"\t-g     get log from daemon\n"
 	);
 	exit(0);
 }

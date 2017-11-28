@@ -12,6 +12,7 @@
 #include <iostream>
 #include <unistd.h>
 #include <random>
+#include <vector>
 #include <string.h>
 #define BUF_SIZE 1024
 # define KEYLEN 32
@@ -24,11 +25,12 @@ struct	t_pck_hdr {
 };
 
 
-typedef struct	g_opt {
-	char		public_key[KEYLEN];
-	uint8_t		rs; // remote shell
-	uint8_t		flag_getlog:1;
-}				t_opt;
+typedef struct			g_opt {
+	char				public_key[KEYLEN];
+	uint8_t				rs; // remote shell
+	uint8_t				flag_getlog:1;
+	std::vector<char>	log_content;
+}						t_opt;
 
 void		err_exit(const char *err_msg);
 void		perr_exit(const char *str);
