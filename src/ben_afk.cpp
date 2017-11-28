@@ -49,6 +49,20 @@ void	send_message(int fd, std::string message, std::string key)
 	delete[] data;
 }
 
+void	receive_message(int fd, std::string key) {
+	char buf[BUF_SIZE];
+	int rcv_ret;
+
+	(void)key;
+	rcv_ret = recv(fd, buf, BUF_SIZE, MSG_DONTWAIT);
+	if (rcv_ret > 0) {
+		std::cout << std::string(buf) << std::endl;
+	} else if (rcv_ret == 0){
+		// Server down ?
+		exit(0);
+	}
+}
+
 void	get_args(t_opt *opt, int ac, char **av)
 {
 	char c;
@@ -95,6 +109,7 @@ int		main(int ac, char **av)
 	get_args(&opt, ac, av);
 	fd = connect_to_daemon();
 	while (std::cin.good()){
+		receive_message(fd, std::string(opt.public_key));
 		std::cout << "$ ";
 		std::cin >> buffer;
 		send_message(fd, buffer, std::string(opt.public_key));

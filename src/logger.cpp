@@ -76,5 +76,6 @@ void		Tintin_reporter::archive() {
 	filename = this->file_path.substr(this->file_path.find_last_of("/\\") + 1);
 	cmd = "tar -czf " + archive_name + " " + filename
 		+ " -C " + this->parent_directory_path;
+	std::cout << cmd << std::endl;
 	system(cmd.c_str());
 }

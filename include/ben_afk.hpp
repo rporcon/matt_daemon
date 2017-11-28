@@ -13,6 +13,7 @@
 #include <unistd.h>
 #include <random>
 #include <string.h>
+#define BUF_SIZE 1024
 # define KEYLEN 32
 
 struct	t_pck_hdr {
