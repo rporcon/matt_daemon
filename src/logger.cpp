@@ -56,6 +56,10 @@ std::string Tintin_reporter::format_log(const std::string &message) {
 	return (ss.str());
 }
 
+std::vector<std::string>	Tintin_reporter::get_logs() {
+
+}
+
 void		Tintin_reporter::archive() {
 	std::stringstream ss;
 	std::string archive_name;

@@ -14,9 +14,11 @@ class Server {
 		void accept_clt_sock (void);
 		void clean_fd(struct pollfd *, int, int *);
 		void pck_rcv(int *, int *, int);
+		void pck_wrt(int *clt_sock, int *clean_fd, int index_fd);
 	private:
-		int						sock;
-		std::vector<char>		client_msg[MAX_SOCK - 1];
+		int							sock;
+		std::vector<char>			client_msg[MAX_SOCK - 1];
+		std::vector<std::string>	logs[MAX_SOCK - 1];
 };
 
 void		init_sigfd();

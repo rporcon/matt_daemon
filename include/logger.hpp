@@ -7,7 +7,9 @@ public:
 		static Tintin_reporter instance("/var/log/matt_daemon/matt_daemon.log");
 		return (instance);
 	}
-	void			log(const std::string &message);
+	void						log(const std::string &message);
+	std::vector<std::string>	get_logs();
+
 private:
 	Tintin_reporter(void);
 	Tintin_reporter(std::string file_path);

@@ -6,7 +6,7 @@
 /*   By: rporcon <rporcon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2017/08/19 19:07:53 by rporcon           #+#    #+#             */
-/*   Updated: 2017/11/28 10:55:57 by amathias         ###   ########.fr       */
+/*   Updated: 2017/11/28 11:25:45 by amathias         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -32,6 +32,9 @@ Server &Server::operator=(Server const & rhs) {
 	}
 	return (*this);
 }
+void Server::pck_wrt(int *clt_sock, int *clean_fd, int index_fd) {
+
+}
 
 void Server::pck_rcv(int *clt_sock, int *clean_fd, int index_fd)
 {
@@ -50,13 +53,15 @@ void Server::pck_rcv(int *clt_sock, int *clean_fd, int index_fd)
 			std::min(sizeof(t_pck_hdr), this->client_msg[index_fd - 1].size()));
 	if (pck_hdr.secret == 0x42244224) {
 		if (this->client_msg[index_fd - 1].size()
-				>= pck_hdr.size + sizeof(t_pck_hdr)) {
+				>=pck_hdr.size + sizeof(t_pck_hdr)) {
 			std::string message =
 				std::string(client_msg[index_fd - 1].begin() + sizeof(t_pck_hdr),
 						client_msg[index_fd - 1].end());
 			Tintin_reporter::getInstance().log("received: " + message);
 			if (std::string(message).compare("quit") == 0) {
 				close_server(-1);
+			} else if (std::string(message).compare("getlog") == 0) {
+				this->logs[index_fd - 1] = Tintin_reporter::getInstance().get_logs();
 			}
 			this->client_msg[index_fd - 1].clear();
 		}
@@ -161,7 +166,7 @@ void Server::accept_clt_sock () {
 					}
 					else {
 						pols[pol_nb].fd = clt_sock;
-						pols[pol_nb].events = POLLIN;
+						pols[pol_nb].events = POLLIN | POLLOUT;
 						pols[pol_nb].revents = 0;
 						pol_nb++;
 						Tintin_reporter::getInstance().log("client connected on socket "
@@ -176,8 +181,10 @@ void Server::accept_clt_sock () {
 						/* 	execv(shcmd[0], shcmd); */
 					}
 				}
-				else  {
+				else if (pols[i].revents & POLLIN) {
 					this->pck_rcv(&pols[i].fd, &clean_fd, i);
+				} else {
+					this->pck_wrt(&pols[i].fd, &clean_fd, i);
 				}
 			}
 			if (clean_fd == 1) {

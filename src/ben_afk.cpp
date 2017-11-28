@@ -27,6 +27,8 @@ void	send_message(int fd, std::string message, std::string key)
 	data = new char[message.size() + sizeof(t_pck_hdr)];
 	memset(data, 0, message.size() + sizeof(t_pck_hdr));
 	hdr.size = message.length();
+	if (message.compare("getlog") == 0) // send getlog unencrypted
+		key.clear();
 	if (key.empty()) {
 		hdr.encrypted = 0;
 		memcpy(data, &hdr, sizeof(t_pck_hdr));
@@ -95,7 +97,7 @@ int		main(int ac, char **av)
 	while (std::cin.good()){
 		std::cout << "$ ";
 		std::cin >> buffer;
-		send_message(fd, buffer, "");
+		send_message(fd, buffer, std::string(opt.public_key));
 		if (buffer == "quit")
 			break ;
 	}
