@@ -15,7 +15,7 @@ void		err_exit(const char *err_msg)
 
 void		print_help()
 {
-	printf("Usage: ft_nmap [options]\n"
+	printf("Usage: ./Ben_AFK [options]\n"
 		"\t-h     print this help screen\n"
 		"\t-k     generate public and private key\n"
 		"\t-e     [your public key] send crypted messages\n"

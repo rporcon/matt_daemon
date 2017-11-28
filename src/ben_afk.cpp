@@ -22,7 +22,7 @@ int		connect_to_daemon()
 void	send_message(int fd, std::string message, std::string key)
 {
 	char		*data;
-	t_pck_hdr	hdr = {0, 0};
+	t_pck_hdr	hdr = {0x42244224,0, 0};
 
 	data = new char[message.size() + sizeof(t_pck_hdr)];
 	memset(data, 0, message.size() + sizeof(t_pck_hdr));

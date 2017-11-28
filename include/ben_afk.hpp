@@ -16,6 +16,7 @@
 # define KEYLEN 32
 
 struct	t_pck_hdr {
+	uint32_t	secret;
 	uint64_t	size;
 	uint32_t	encrypted;
 };

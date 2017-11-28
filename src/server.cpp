@@ -6,7 +6,7 @@
 /*   By: rporcon <rporcon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2017/08/19 19:07:53 by rporcon           #+#    #+#             */
-/*   Updated: 2017/11/27 23:14:44 by amathias         ###   ########.fr       */
+/*   Updated: 2017/11/28 10:41:31 by amathias         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -35,7 +35,7 @@ Server &Server::operator=(Server const & rhs) {
 
 void Server::pck_rcv(int *clt_sock, int *clean_fd, int index_fd)
 {
-	t_pck_hdr			pck_hdr = {0, 0};
+	t_pck_hdr			pck_hdr = {0, 0, 0};
 	char				buf[BUF_SIZE] = {0};
 	/* void				*msg = NULL; */
 	/* size_t				pck_len = 0; */
@@ -48,17 +48,36 @@ void Server::pck_rcv(int *clt_sock, int *clean_fd, int index_fd)
 	}
 	if (this->client_msg[index_fd - 1].size() > sizeof(t_pck_hdr)) {
 		memcpy(&pck_hdr, this->client_msg[index_fd - 1].data(), sizeof(t_pck_hdr));
-		if (this->client_msg[index_fd - 1].size()
-				>= pck_hdr.size + sizeof(t_pck_hdr)) {
-			/* this->client_msg[index_fd - 1].erase(bn_pos, 1); */
-			std::string message =
-				std::string(client_msg[index_fd - 1].begin() + sizeof(t_pck_hdr),
-						client_msg[index_fd - 1].end());
-			Tintin_reporter::getInstance().log("received: " + message);
-			if (std::string(message).compare("quit") == 0) {
-				close_server(0);
+		if (pck_hdr.secret == 0x42244224) {
+			if (this->client_msg[index_fd - 1].size()
+					>= pck_hdr.size + sizeof(t_pck_hdr)) {
+				/* this->client_msg[index_fd - 1].erase(bn_pos, 1); */
+				std::string message =
+					std::string(client_msg[index_fd - 1].begin() + sizeof(t_pck_hdr),
+							client_msg[index_fd - 1].end());
+				Tintin_reporter::getInstance().log("received: " + message);
+				if (std::string(message).compare("quit") == 0) {
+					close_server(-1);
+				}
+				this->client_msg[index_fd - 1].clear();
 			}
-			this->client_msg[index_fd - 1].clear();
+		} else {
+			bool bs = false;
+			for (auto c : this->client_msg[index_fd - 1]) {
+				if (c == '\n') {
+					bs = true;
+					break ;
+				}
+			}
+			if (bs) {
+				std::string message =
+					std::string(client_msg[index_fd - 1].begin(),
+							client_msg[index_fd - 1].end());
+				Tintin_reporter::getInstance().log("received: " + message);
+				if (std::string(message).compare("quit") == 0) {
+					close_server(-1);
+				}
+			}
 		}
 	}
 
@@ -171,11 +190,11 @@ void Server::accept_clt_sock () {
 
 void	close_server(int signum)
 {
-	if (signum != 0) {
+	if (signum != -1) {
 		Tintin_reporter::getInstance().log("signal "
 				+ std::to_string(signum) + " received");
 	}
-	if (signum == SIGTERM || signum == SIGINT || signum == SIGQUIT) {
+	if (signum == SIGTERM || signum == SIGINT || signum == SIGQUIT || signum == -1) {
 		if (unlink("/var/lock/matt_daemon.lock") == -1)
 			perr_exit("unlink");
 		if (flock(g_lock_fd, LOCK_UN) == -1)

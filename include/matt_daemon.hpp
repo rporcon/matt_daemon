@@ -28,8 +28,9 @@
 #include "logger.hpp"
 
 struct	t_pck_hdr {
+	uint32_t	secret;
 	uint64_t	size;
-	uint32_t	encrypted;
+	uint8_t	encrypted;
 };
 
 extern int	g_lock_fd;
