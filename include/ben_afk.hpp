@@ -25,6 +25,7 @@ struct	t_pck_hdr {
 
 typedef struct	g_opt {
 	char		public_key[KEYLEN];
+	uint8_t		flag_getlog:1;
 }				t_opt;
 
 void		err_exit(const char *err_msg);
