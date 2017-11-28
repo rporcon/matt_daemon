@@ -57,7 +57,12 @@ std::string Tintin_reporter::format_log(const std::string &message) {
 }
 
 std::vector<std::string>	Tintin_reporter::get_logs() {
-
+	std::vector<std::string> logs;
+	std::ifstream ifs (this->file_path, std::ifstream::in);
+	for (std::string line; std::getline(ifs, line);) {
+		logs.push_back(line);
+	}
+	return (logs);
 }
 
 void		Tintin_reporter::archive() {
