@@ -34,10 +34,7 @@ void	keygen()
 {
 	char	key[KEYLEN + 1] = {0};
 
-	printf("Your keys: \n");
 	gen_random(key);
-	printf("\tpublic:  %s\n", key);
-	gen_random(key);
-	printf("\tprivate: %s\n", key);
+	printf("Your key: \n%s\n", key);
 	exit(0);
 }

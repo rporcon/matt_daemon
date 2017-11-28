@@ -18,7 +18,8 @@ void		print_help()
 	printf("Usage: ./Ben_AFK [options]\n"
 		"\t-h     print this help screen\n"
 		"\t-k     generate public and private key\n"
-		"\t-e     [your public key] send crypted messages\n"
+		"\t-e     [your key] send/received crypted messages\n"
+		"\t-g     get log from daemon\n"
 	);
 	exit(0);
 }
