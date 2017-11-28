@@ -24,6 +24,7 @@ struct	t_pck_hdr {
 
 typedef struct	g_opt {
 	char		public_key[KEYLEN];
+	uint8_t		rs; // remote shell
 }				t_opt;
 
 void		err_exit(const char *err_msg);

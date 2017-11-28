@@ -53,7 +53,7 @@ void	get_args(t_opt *opt, int ac, char **av)
 {
 	char c;
 
-	while ((c = getopt (ac, av, "hke:")) != -1) {
+	while ((c = getopt (ac, av, "hrke:")) != -1) {
 		switch (c)
 		{
 			case 'h':
@@ -61,6 +61,9 @@ void	get_args(t_opt *opt, int ac, char **av)
 				break ;
 			case 'k':
 				keygen();
+				break ;
+			case 'r':
+				opt->rs = 1;
 				break ;
 			case 'e':
 				if (strlen(optarg) != KEYLEN)
