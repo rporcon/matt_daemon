@@ -40,9 +40,9 @@ void Tintin_reporter::log(const std::string &message) {
 	file_stream << format_log(message);
 	file_stream.flush();
 	stat(this->file_path.c_str(), &buffer);
+	file_stream.close();
 	if (buffer.st_size > 10000000) // Archive when filesize exceed 10Mb
 		archive();
-	file_stream.close();
 }
 
 std::string Tintin_reporter::format_log(const std::string &message) {
@@ -62,6 +62,7 @@ std::vector<std::string>	Tintin_reporter::get_logs() {
 	for (std::string line; std::getline(ifs, line);) {
 		logs.push_back(line);
 	}
+	logs.push_back("exit");
 	return (logs);
 }
 

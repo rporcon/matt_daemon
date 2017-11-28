@@ -6,7 +6,7 @@
 /*   By: rporcon <rporcon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2017/08/19 19:07:53 by rporcon           #+#    #+#             */
-/*   Updated: 2017/11/28 11:25:45 by amathias         ###   ########.fr       */
+/*   Updated: 2017/11/28 14:37:32 by amathias         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -33,11 +33,12 @@ Server &Server::operator=(Server const & rhs) {
 	return (*this);
 }
 void Server::pck_wrt(int clt_sock, int index_fd) {
-	int		send_ret; 
+	std::string message;
+	int			send_ret;
 
 	if (this->logs[index_fd].empty() == false) {
-		send_ret = send(clt_sock, this->logs[index_fd][0].data(),
-				this->logs[index_fd][0].size(), 0);
+		message = this->logs[index_fd][0] + "\n";
+		send_ret = send(clt_sock, message.c_str(), message.length(), 0);
 		this->logs[index_fd][0].erase(0, send_ret);
 		if (this->logs[index_fd][0].empty() == true) {
 			this->logs[index_fd].erase(this->logs[index_fd].begin());

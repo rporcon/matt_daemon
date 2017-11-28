@@ -49,11 +49,30 @@ void	send_message(int fd, std::string message, std::string key)
 	delete[] data;
 }
 
+int 	receive_message(int fd, std::string key) {
+	std::string message;
+	char buf[BUF_SIZE];
+	int rcv_ret;
+
+	(void)key;
+	rcv_ret = recv(fd, buf, BUF_SIZE, 0);
+	if (rcv_ret > 0) {
+		message = std::string(buf, rcv_ret);
+		if (message.compare("exit\n") == 0)
+			exit(0);
+		std::cout << message;
+	} else if (rcv_ret <= 0){
+		// Server down ?
+		exit(0);
+	}
+	return (rcv_ret);
+}
+
 void	get_args(t_opt *opt, int ac, char **av)
 {
 	char c;
 
-	while ((c = getopt (ac, av, "hrke:")) != -1) {
+	while ((c = getopt (ac, av, "hrke:g")) != -1) {
 		switch (c)
 		{
 			case 'h':
@@ -69,6 +88,9 @@ void	get_args(t_opt *opt, int ac, char **av)
 				if (strlen(optarg) != KEYLEN)
 					err_exit("incorrect key length");
 				memcpy(opt->public_key, optarg, KEYLEN);
+				break;
+			case 'g':
+				opt->flag_getlog = 1;
 				break;
 			case '?':
 				if (optopt == 'e') {
@@ -97,12 +119,19 @@ int		main(int ac, char **av)
 	memset(&opt, 0, sizeof opt);
 	get_args(&opt, ac, av);
 	fd = connect_to_daemon();
-	while (std::cin.good()){
-		std::cout << "$ ";
-		std::cin >> buffer;
-		send_message(fd, buffer, std::string(opt.public_key));
-		if (buffer == "quit")
-			break ;
+	if (opt.flag_getlog) {
+		send_message(fd, "getlog", std::string(opt.public_key));
+		while (1) {
+			receive_message(fd, std::string(opt.public_key));
+		}
+	} else {
+		while (std::cin.good()){
+			std::cout << "$ ";
+			std::cin >> buffer;
+			send_message(fd, buffer, std::string(opt.public_key));
+			if (buffer == "quit")
+				break ;
+		}
 	}
 	close(fd);
 }
