@@ -75,8 +75,8 @@ void		Tintin_reporter::archive() {
 	ss << std::time(nullptr);
 	archive_name = "matt_daemon_" + ss.str() + ".tar.gz";
 	filename = this->file_path.substr(this->file_path.find_last_of("/\\") + 1);
-	cmd = "tar -czf " + archive_name + " " + filename
-		+ " -C " + this->parent_directory_path;
-	std::cout << cmd << std::endl;
+	cmd = "tar -czf " + archive_name + " " + filename;
+	chdir(this->parent_directory_path.c_str());
 	system(cmd.c_str());
+	chdir("/");
 }
