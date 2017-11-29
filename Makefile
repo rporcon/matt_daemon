@@ -20,7 +20,7 @@ OBJ_BEN = $(SRC_BEN:%.cpp=%.o)
 
 CC = g++
 
-LFLAGS =
+LFLAGS = -ltar
 
 IFLAGS = -I$(INCLUDE_DIR)
 
