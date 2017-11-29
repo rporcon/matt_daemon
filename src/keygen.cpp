@@ -21,7 +21,7 @@ void gen_random(char *s) {
 		"0123456789"
 		"ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 		"abcdefghijklmnopqrstuvwxyz"
-		"#$%&'()*+,-./\\:;<=>?@[]_^{|}~";
+		"%&'()*+,-./:;<=>?@[]_^{|}~";
 	unsigned long		seed = gen_seed(clock(), time(NULL), getpid());
 
 	srand(seed);
