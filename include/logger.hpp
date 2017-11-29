@@ -1,5 +1,15 @@
 #pragma once
-#include "matt_daemon.hpp"
+
+#include <vector>
+#include <string>
+#include <ctime>
+#include <fstream>
+#include <sstream>
+#include <iostream>
+#include <iomanip>
+#include <libtar.h>
+#include <unistd.h>
+#include <fcntl.h>
 
 class Tintin_reporter {
 public:

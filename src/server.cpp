@@ -139,9 +139,9 @@ void Server::server_create (int port) {
 	sin6.sin6_port = htons(port);
 	sin6.sin6_addr = in6addr_any;
 	if (bind(this->sock, (struct sockaddr *)&sin6, sizeof(sin6)) == -1)
-		perr_exit("bind");
+		log_exit("cannot bind server socket", 1);
 	if (listen(this->sock, 42) == -1)
-		perr_exit("listen");
+		log_exit("cannot listen to port 42", 1);
 }
 
 void Server::clean_fd (struct pollfd *pols, int pol_size, int *pol_nb) {
@@ -216,12 +216,15 @@ void	close_server(int signum)
 				+ std::to_string(signum) + " received");
 	}
 	if (signum == SIGTERM || signum == SIGINT || signum == SIGQUIT || signum == -1) {
-		if (unlink("/var/lock/matt_daemon.lock") == -1)
-			perr_exit("unlink");
-		if (flock(g_lock_fd, LOCK_UN) == -1)
-			perr_exit("flock unlock");
-		if (close(g_lock_fd) == -1)
-			perr_exit("server fd close");
+		if (unlink("/var/lock/matt_daemon.lock") == -1) {
+			log_exit("cannot unlink matt_daemon", 1);
+		}
+		if (flock(g_lock_fd, LOCK_UN) == -1) {
+			log_exit("cannot unlock matt_daemon", 1);
+		}
+		if (close(g_lock_fd) == -1) {
+			log_exit("cannot close server socket", 1);
+		}
 		Tintin_reporter::getInstance().log("stopping daemon");
 		exit(0);
 	}

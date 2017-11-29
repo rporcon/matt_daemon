@@ -1,4 +1,4 @@
-#include "matt_daemon.hpp"
+#include "svrclt_common.hpp"
 
 void		perr_exit(const char *str)
 {
@@ -11,6 +11,13 @@ void		err_exit(const char *err_msg)
 	if (err_msg != NULL)
 		fprintf(stderr, "Error: %s\n", err_msg);
 	exit(1);
+}
+
+void		log_exit(const char *str, int status_code)
+{
+	(void)str;
+	Tintin_reporter::getInstance().log("BONJOUR");
+	exit(status_code);
 }
 
 void		print_help()

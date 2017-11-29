@@ -42,8 +42,10 @@ void Tintin_reporter::log(const std::string &message) {
 		file_stream.flush();
 		file_stream.close();
 		int ret = stat(this->file_path.c_str(), &buffer);
-		if (ret == -1)
-			perr_exit("stat");
+		if (ret == -1) {
+			perror("stat");
+			exit(1);
+		}
 		if (buffer.st_size > 10000000) { // Archive when filesize exceed 10Mb
 			archive();
 			unlink(this->file_path.c_str());

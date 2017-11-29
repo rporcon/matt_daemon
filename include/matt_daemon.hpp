@@ -25,16 +25,9 @@
 #include <fcntl.h>
 #include <vector>
 #include <libtar.h>
-#include "server.hpp"
 #include "logger.hpp"
-
-struct	t_pck_hdr {
-	uint32_t	secret;
-	uint64_t	size;
-	uint8_t	encrypted;
-};
+#include "server.hpp"
+#include "svrclt_common.hpp"
 
 extern int	g_lock_fd;
 
-void		err_exit(const char *err_msg);
-void		perr_exit(const char *str);

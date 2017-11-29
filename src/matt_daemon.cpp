@@ -43,7 +43,8 @@ int main(void) {
 	init_sigfd();
 	g_lock_fd = open("/var/lock/matt_daemon.lock", O_CREAT);
 	if (flock(g_lock_fd, LOCK_EX | LOCK_NB) == -1) {
-		perr_exit("flock lock");
+		Tintin_reporter::getInstance().log("cannot launch matt_daemon (because of lock)");
+		err_exit("cannot launch matt_daemon (because of lock)");
 	}
 
 	Tintin_reporter::getInstance().log("starting daemon");

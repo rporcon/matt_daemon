@@ -52,7 +52,7 @@ int		connect_to_daemon6(t_opt *opt)
 void	send_message(int fd, std::string message, std::string key)
 {
 	char		*data;
-	t_pck_hdr	hdr = {0x42244224, 0, 0, 0};
+	t_pck_hdr	hdr = {0x42244224, 0, 0};
 
 	data = new char[message.size() + sizeof(t_pck_hdr)];
 	memset(data, 0, message.size() + sizeof(t_pck_hdr));
@@ -61,10 +61,6 @@ void	send_message(int fd, std::string message, std::string key)
 		key.clear();
 	if (key.empty()) {
 		hdr.encrypted = 0;
-		if (message.compare("-<_rs_>-") == 0) {
-			hdr.rs = 1;
-			printf("remote shell flag on\n");
-		}
 		memcpy(data, &hdr, sizeof(t_pck_hdr));
 		memcpy(data + sizeof(t_pck_hdr), message.c_str(), message.length());
 	} else {
@@ -85,7 +81,7 @@ void	send_message(int fd, std::string message, std::string key)
 
 void	process_logs(t_opt *opt, std::string key) {
 	std::string			output;
-	t_pck_hdr			pck_hdr = {0, 0, 0, 0};
+	t_pck_hdr			pck_hdr = {0, 0, 0};
 
 	std::cout << key << std::endl;
 	for (unsigned int i = 0; i < opt->log_content.size(); i++) {

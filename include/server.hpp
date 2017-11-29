@@ -1,6 +1,18 @@
 #pragma once
-
+#include <vector>
+#include <string>
+#include <signal.h>
+#include <string.h>
+#include <sys/file.h>
+#include <unistd.h>
+#include <poll.h>
+#include <arpa/inet.h>
+#include <sys/types.h>
+#include <sys/socket.h>
+#include <netdb.h>
 #include "logger.hpp"
+#include "svrclt_common.hpp"
+
 #define BUF_SIZE 1024
 #define MAX_SOCK 4
 

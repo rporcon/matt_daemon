@@ -3,7 +3,7 @@ SRCS_DIR = ./src/
 INCLUDE_DIR = ./include
 
 
-SRC_FILE_MATT = matt_daemon.cpp logger.cpp utils.cpp server.cpp \
+SRC_FILE_MATT = svrclt_common.cpp matt_daemon.cpp logger.cpp server.cpp \
 				rc4_cipher.cpp
 
 SRC_MATT = $(addprefix $(SRCS_DIR), $(SRC_FILE_MATT))
@@ -11,7 +11,8 @@ SRC_MATT = $(addprefix $(SRCS_DIR), $(SRC_FILE_MATT))
 OBJ_MATT = $(SRC_MATT:%.cpp=%.o)
 
 
-SRC_FILE_BEN = ben_afk.cpp utils.cpp keygen.cpp rc4_cipher.cpp
+SRC_FILE_BEN = ben_afk.cpp svrclt_common.cpp keygen.cpp rc4_cipher.cpp \
+			   logger.cpp
 
 SRC_BEN = $(addprefix $(SRCS_DIR), $(SRC_FILE_BEN))
 
