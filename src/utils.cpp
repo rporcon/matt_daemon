@@ -17,7 +17,7 @@ void		print_help()
 {
 	printf("Usage: ./Ben_AFK [hostname/ip] [port] [options]\n"
 		"\t-h     print this help screen\n"
-		"\t-k     generate public and private key\n"
+		"\t-k     generate your key\n"
 		"\t-r     spawn a remote shell\n"
 		"\t-e     [your key] send/received crypted messages\n"
 		"\t-g     get log from daemon\n"
