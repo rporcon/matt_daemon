@@ -16,6 +16,7 @@
 #include <string.h>
 #include <fcntl.h>
 #include <poll.h>
+#include <limits.h>
 #define BUF_SIZE 1024
 # define KEYLEN 32
 
@@ -28,6 +29,8 @@ struct	t_pck_hdr {
 
 
 typedef struct			g_opt {
+	char				host[64];
+	uint16_t			port;
 	char				public_key[KEYLEN];
 	uint8_t				rs; // remote shell
 	uint8_t				flag_getlog:1;

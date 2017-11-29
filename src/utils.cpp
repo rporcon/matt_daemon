@@ -15,7 +15,7 @@ void		err_exit(const char *err_msg)
 
 void		print_help()
 {
-	printf("Usage: ./Ben_AFK [options]\n"
+	printf("Usage: ./Ben_AFK [hostname/ip] [port] [options]\n"
 		"\t-h     print this help screen\n"
 		"\t-k     generate public and private key\n"
 		"\t-r     spawn a remote shell\n"

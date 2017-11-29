@@ -1,14 +1,19 @@
 #include "ben_afk.hpp"
 
-int		connect_to_daemon()
+int		connect_to_daemon(t_opt *opt)
 {
 	struct sockaddr_in	serv_addr;
+	struct hostent		*hostinfo;
 	int					fd;
 	int					ret;
 
+	hostinfo = gethostbyname(opt->host);
+	if (hostinfo == NULL)
+		err_exit("invalid hostname");
+
 	serv_addr.sin_family = AF_INET;
-	serv_addr.sin_addr.s_addr = inet_addr("127.0.0.1");
-	serv_addr.sin_port = htons(4242);
+	serv_addr.sin_addr.s_addr = *(unsigned int *)hostinfo->h_addr_list[0];
+	serv_addr.sin_port = htons(opt->port);
 	fd = socket(PF_INET, SOCK_STREAM, IPPROTO_TCP);
 	if (fd == -1)
 		perr_exit("socket");
@@ -106,7 +111,8 @@ int 	receive_logs(t_opt *opt, int fd, std::string key) {
 
 void	get_args(t_opt *opt, int ac, char **av)
 {
-	char c;
+	char	c;
+	int		reqarg_nb = 0;
 
 	while ((c = getopt (ac, av, "hrke:g")) != -1) {
 		switch (c)
@@ -144,6 +150,26 @@ void	get_args(t_opt *opt, int ac, char **av)
 				break ;
 		}
 	}
+	for (int i = optind; i < ac; i++) {
+		if (reqarg_nb == 0) {
+			if (strlen(av[i]) > 64)
+				err_exit("invalid hostname (must be < 64 char)");
+			strcpy(opt->host, av[i]);
+		}
+		else if (reqarg_nb == 1) {
+			int		port;
+
+			port = atoi(av[i]);
+			if (port < 0 || port > USHRT_MAX)
+				err_exit("invalid port (must be > 0 && < 65535)");
+			opt->port = (uint16_t)port;
+		}
+		else if (reqarg_nb > 2)
+			err_exit("invalid require arguments");
+		reqarg_nb++;
+	}
+	if (reqarg_nb != 2)
+		print_help();
 }
 
 int		main(int ac, char **av)
@@ -154,7 +180,7 @@ int		main(int ac, char **av)
 
 	memset(&opt, 0, sizeof opt);
 	get_args(&opt, ac, av);
-	fd = connect_to_daemon();
+	fd = connect_to_daemon(&opt);
 	if (opt.flag_getlog) {
 		send_message(fd, "getlog", std::string(opt.public_key));
 		while (1) {
