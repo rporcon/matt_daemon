@@ -191,7 +191,7 @@ void	get_args(t_opt *opt, int ac, char **av)
 void	rs_connect(int fd)
 {
 	struct pollfd	pols[2];
-	int				pol_nb = 2;		
+	int				pol_nb = 2;
 	char			buf[BUF_SIZE];
 	int				rcv_ret;
 
@@ -222,10 +222,10 @@ void	rs_connect(int fd)
 	}
 }
 
-void	default_connect(int fd)
+void	default_connect(int fd, t_opt *opt)
 {
 	struct pollfd	pols[2];
-	int				pol_nb = 2;		
+	int				pol_nb = 2;
 	char			buf[BUF_SIZE];
 	int				rcv_ret;
 
@@ -252,7 +252,10 @@ void	default_connect(int fd)
 			if (pols[1].revents & POLLIN) {
 				rcv_ret = read(0, buf, BUF_SIZE);
 				printf("$ "); fflush(stdout);
-				write(fd, buf, rcv_ret);
+				send_message(fd, std::string(buf, rcv_ret),
+						std::string(opt->public_key));
+				//write(fd, buf, rcv_ret);
+
 			}
 		}
 	}
@@ -278,7 +281,7 @@ int		main(int ac, char **av)
 	} else if (opt.rs) {
 		rs_connect(fd);
 	} else {
-		default_connect(fd);
+		default_connect(fd, &opt);
 	}
 	close(fd);
 }
