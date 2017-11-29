@@ -34,7 +34,6 @@ Tintin_reporter & Tintin_reporter::operator=(Tintin_reporter const & rhs) {
 }
 
 void Tintin_reporter::log(const std::string &message) {
-	std::cout << "log begin" << std::endl;
 	struct stat buffer;
 	std::ofstream file_stream(this->file_path,std::ios::out | std::ios::app);
 
@@ -42,21 +41,14 @@ void Tintin_reporter::log(const std::string &message) {
 		file_stream << format_log(message);
 		file_stream.flush();
 		file_stream.close();
-		std::cout << "before stat" << std::endl;
 		int ret = stat(this->file_path.c_str(), &buffer);
-		std::cout << " stat" << std::endl;
 		if (ret == -1)
 			perr_exit("stat");
-		//std::cout << "buffer.st_size: " << buffer.st_size << std::endl;
 		if (buffer.st_size > 10000000) { // Archive when filesize exceed 10Mb
-			std::cout << "buf > 1000000000" << std::endl;
-			std::cout << "buffer.st_size" << std::endl;
 			archive();
 			unlink(this->file_path.c_str());
-
 		}
 	}
-	std::cout << "log end" << std::endl;
 }
 
 std::string Tintin_reporter::format_log(const std::string &message) {
@@ -82,7 +74,6 @@ std::vector<std::string>	Tintin_reporter::get_logs() {
 }
 
 void		Tintin_reporter::archive() {
-	std::cout << "begin archive" << std::endl;
 	std::stringstream ss;
 	std::string archive_name;
 	std::string cmd;
@@ -99,5 +90,4 @@ void		Tintin_reporter::archive() {
 	tar_append_eof(ptar);
 	tar_close(ptar);
 	chdir("/");
-	std::cout << "end archive" << std::endl;
 }
