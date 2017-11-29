@@ -82,6 +82,7 @@ void	send_message(int fd, std::string message, std::string key)
 void	process_logs(t_opt *opt, std::string key) {
 	std::string			output;
 	t_pck_hdr			pck_hdr = {0, 0, 0};
+	std::string			tmp;
 
 	std::cout << key << std::endl;
 	for (unsigned int i = 0; i < opt->log_content.size(); i++) {
@@ -97,8 +98,13 @@ void	process_logs(t_opt *opt, std::string key) {
 			message_enc[pck_hdr.size] = '\0';
 			rc4(reinterpret_cast<const unsigned char *>(key.c_str()),
 				key.length(), message_enc, pck_hdr.size);
-			output += std::string(message_enc);
+			tmp = std::string(message_enc);
 			delete[] message_enc;
+			size_t bs_pos;
+			if ((bs_pos = tmp.find_last_of('\n')) != std::string::npos) {
+				tmp.erase(bs_pos, 1);
+			}
+			output += tmp;
 			i += (sizeof(t_pck_hdr) + pck_hdr.size) - 1;
 		} else {
 			output += opt->log_content[i];
