@@ -30,7 +30,6 @@ struct	t_pck_hdr {
 
 typedef struct			g_opt {
 	char				host[64];
-	uint16_t			port;
 	char				public_key[KEYLEN];
 	uint8_t				rs; // remote shell
 	uint8_t				ipv6; // remote shell

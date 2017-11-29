@@ -13,7 +13,7 @@ int		connect_to_daemon(t_opt *opt)
 
 	serv_addr.sin_family = AF_INET;
 	serv_addr.sin_addr.s_addr = *(unsigned int *)hostinfo->h_addr_list[0];
-	serv_addr.sin_port = htons(opt->port);
+	serv_addr.sin_port = htons(4242);
 	fd = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
 	if (fd == -1)
 		perr_exit("socket");
@@ -38,7 +38,7 @@ int		connect_to_daemon6(t_opt *opt)
 	serv_addr.sin6_family = AF_INET6;
 	memcpy(serv_addr.sin6_addr.s6_addr, hostinfo->h_addr_list[0],
 			sizeof serv_addr.sin6_addr.s6_addr);
-	serv_addr.sin6_port = htons(opt->port);
+	serv_addr.sin6_port = htons(4242);
 	fd = socket(AF_INET6, SOCK_STREAM, IPPROTO_TCP);
 	if (fd == -1)
 		perr_exit("socket");
@@ -184,19 +184,11 @@ void	get_args(t_opt *opt, int ac, char **av)
 				err_exit("invalid hostname (must be < 64 char)");
 			strcpy(opt->host, av[i]);
 		}
-		else if (reqarg_nb == 1) {
-			int		port;
-
-			port = atoi(av[i]);
-			if (port < 0 || port > USHRT_MAX)
-				err_exit("invalid port (must be > 0 && < 65535)");
-			opt->port = (uint16_t)port;
-		}
-		else if (reqarg_nb > 2)
+		else if (reqarg_nb > 1)
 			err_exit("invalid require arguments");
 		reqarg_nb++;
 	}
-	if (reqarg_nb != 2)
+	if (reqarg_nb != 1)
 		print_help();
 }
 
