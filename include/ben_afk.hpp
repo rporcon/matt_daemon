@@ -14,6 +14,8 @@
 #include <random>
 #include <vector>
 #include <string.h>
+#include <fcntl.h>
+#include <poll.h>
 #define BUF_SIZE 1024
 # define KEYLEN 32
 

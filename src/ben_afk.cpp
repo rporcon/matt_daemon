@@ -166,27 +166,12 @@ void	get_args(t_opt *opt, int ac, char **av)
 	}
 }
 
-void	test_rc4() {
-	char	key[KEYLEN + 1] = {0};
-	char	data[] = "lol";
-
-	gen_random(key);
-	std::cout << "key: " << key << std::endl;
-	std::cout << "before: " << data << std::endl;
-	rc4((const unsigned char*)key, KEYLEN, data, 3);
-	std::cout << "encrypted: " << data << std::endl;
-	rc4((const unsigned char*)key, KEYLEN, data, 3);
-	std::cout << "de-encrypted: " << data << std::endl;
-	exit(0);
-}
-
 int		main(int ac, char **av)
 {
-	t_opt		opt;
-	std::string buffer;
-	int			fd;
+	t_opt					opt;
+	std::string				buffer;
+	int						fd;
 
-	//test_rc4();
 	memset(&opt, 0, sizeof opt);
 	get_args(&opt, ac, av);
 	fd = connect_to_daemon();
@@ -196,13 +181,37 @@ int		main(int ac, char **av)
 			receive_logs(&opt, fd, std::string(opt.public_key));
 		}
 	} else if (opt.rs) {
-		char		buf[BUF_SIZE];
+		struct pollfd	pols[2];
+		int				pol_nb = 2;		
+		char			buf[BUF_SIZE];
+		int				rcv_ret;
 
+		fcntl(fd, F_SETFL, fcntl(fd, F_GETFL, 0) | O_NONBLOCK);
+		pols[0].fd = fd;
+		pols[0].events = POLLIN;
+		pols[0].revents = -1;
+		pols[1].fd = 0;
+		pols[1].events = POLLIN;
+		pols[1].revents = -1;
 		send_message(fd, "-<_rs_>-", std::string(""));
 		while (1) {
-			int ret = recv(fd, buf, BUF_SIZE, MSG_DONTWAIT);
-			if (ret > 0)
-				std::cout << std::string(buf, ret);
+			if (poll(pols, pol_nb, -1) != -1) {
+				for (int i = 0; i < pol_nb; i++) {
+					if (pols[i].revents == 0) {
+						continue ;
+					}
+					if (pols[i].revents & POLLIN) {
+						rcv_ret = read(fd, buf, BUF_SIZE);
+						write(1, buf, rcv_ret);
+						/* printf("rcv ret client socket: %d\n", rcv_ret); */
+					}
+					if (pols[1].revents & POLLIN) {
+						rcv_ret = read(0, buf, BUF_SIZE);
+						/* printf("rcv ret stdin socket: %d\n", rcv_ret); */
+						write(fd, buf, rcv_ret);
+					}
+				}
+			}
 		}
 	} else {
 		while (std::cin.good()){

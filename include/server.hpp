@@ -1,7 +1,7 @@
 #pragma once
 
 #include "logger.hpp"
-#define BUF_SIZE 10
+#define BUF_SIZE 1024
 #define MAX_SOCK 4
 
 class Server {
