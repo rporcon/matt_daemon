@@ -14,11 +14,36 @@ int		connect_to_daemon(t_opt *opt)
 	serv_addr.sin_family = AF_INET;
 	serv_addr.sin_addr.s_addr = *(unsigned int *)hostinfo->h_addr_list[0];
 	serv_addr.sin_port = htons(opt->port);
-	fd = socket(PF_INET, SOCK_STREAM, IPPROTO_TCP);
+	fd = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
 	if (fd == -1)
 		perr_exit("socket");
 	ret = connect(fd, (const struct sockaddr*)&serv_addr,
 			sizeof(struct sockaddr_in));
+	if (ret == -1)
+		perr_exit("connect");
+	return (fd);
+}
+
+int		connect_to_daemon6(t_opt *opt)
+{
+	struct sockaddr_in6	serv_addr;
+	struct hostent		*hostinfo;
+	int					fd;
+	int					ret;
+
+	hostinfo = gethostbyname2(opt->host, AF_INET6);
+	if (hostinfo == NULL)
+		err_exit("invalid hostname");
+
+	serv_addr.sin6_family = AF_INET6;
+	memcpy(serv_addr.sin6_addr.s6_addr, hostinfo->h_addr_list[0],
+			sizeof serv_addr.sin6_addr.s6_addr);
+	serv_addr.sin6_port = htons(opt->port);
+	fd = socket(AF_INET6, SOCK_STREAM, IPPROTO_TCP);
+	if (fd == -1)
+		perr_exit("socket");
+	ret = connect(fd, (const struct sockaddr*)&serv_addr,
+			sizeof(struct sockaddr_in6));
 	if (ret == -1)
 		perr_exit("connect");
 	return (fd);
@@ -114,7 +139,7 @@ void	get_args(t_opt *opt, int ac, char **av)
 	char	c;
 	int		reqarg_nb = 0;
 
-	while ((c = getopt (ac, av, "hrke:g")) != -1) {
+	while ((c = getopt (ac, av, "6hrke:g")) != -1) {
 		switch (c)
 		{
 			case 'h':
@@ -133,6 +158,9 @@ void	get_args(t_opt *opt, int ac, char **av)
 				break;
 			case 'g':
 				opt->flag_getlog = 1;
+				break;
+			case '6':
+				opt->ipv6 = 1;
 				break;
 			case '?':
 				if (optopt == 'e') {
@@ -180,7 +208,10 @@ int		main(int ac, char **av)
 
 	memset(&opt, 0, sizeof opt);
 	get_args(&opt, ac, av);
-	fd = connect_to_daemon(&opt);
+	if (opt.ipv6 == 0)
+		fd = connect_to_daemon(&opt);
+	else
+		fd = connect_to_daemon6(&opt);
 	if (opt.flag_getlog) {
 		send_message(fd, "getlog", std::string(opt.public_key));
 		while (1) {

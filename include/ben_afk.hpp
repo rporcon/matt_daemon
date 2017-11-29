@@ -33,6 +33,7 @@ typedef struct			g_opt {
 	uint16_t			port;
 	char				public_key[KEYLEN];
 	uint8_t				rs; // remote shell
+	uint8_t				ipv6; // remote shell
 	uint8_t				flag_getlog:1;
 	std::vector<char>	log_content;
 }						t_opt;
