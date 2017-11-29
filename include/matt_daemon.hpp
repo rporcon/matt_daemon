@@ -24,6 +24,7 @@
 #include <arpa/inet.h>
 #include <fcntl.h>
 #include <vector>
+#include <libtar.h>
 #include "server.hpp"
 #include "logger.hpp"
 
