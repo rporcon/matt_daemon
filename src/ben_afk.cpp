@@ -19,6 +19,24 @@ int		connect_to_daemon()
 	return (fd);
 }
 
+void hexdump(void *ptr, int buflen) {
+  unsigned char *buf = (unsigned char*)ptr;
+  int i, j;
+  for (i=0; i<buflen; i+=16) {
+    printf("%06x: ", i);
+    for (j=0; j<16; j++)
+      if (i+j < buflen)
+        printf("%02x ", buf[i+j]);
+      else
+        printf("   ");
+    printf(" ");
+    for (j=0; j<16; j++)
+      if (i+j < buflen)
+        printf("%c", isprint(buf[i+j]) ? buf[i+j] : '.');
+    printf("\n");
+  }
+}
+
 void	send_message(int fd, std::string message, std::string key)
 {
 	char		*data;
@@ -45,6 +63,7 @@ void	send_message(int fd, std::string message, std::string key)
 		message_enc[message.size()] = '\0';
 		rc4(reinterpret_cast<const unsigned char *>(key.c_str()),
 			key.length(), message_enc, message.length());
+		hexdump(message_enc, message.length());
 		memcpy(data + sizeof(t_pck_hdr), message_enc, message.length());
 		delete[] message_enc;
 	}
@@ -62,23 +81,27 @@ void	process_logs(t_opt *opt, std::string key) {
 		memcpy(&pck_hdr, &opt->log_content[i],
 			std::min(sizeof(t_pck_hdr), opt->log_content.size() - i));
 		if (pck_hdr.secret == 0x42244224) {
+			std::cout << "size: " << pck_hdr.size << std::endl;
 			char *message_enc = new char[(pck_hdr.size + 1)];
 			std::copy(opt->log_content.begin() + i,
 					opt->log_content.begin() + i + pck_hdr.size, message_enc);
 			message_enc[pck_hdr.size] = '\0';
+			hexdump(message_enc, pck_hdr.size);
 			rc4(reinterpret_cast<const unsigned char *>(key.c_str()),
 				key.length(), message_enc, pck_hdr.size);
+			std::cout << "message_enc: " << message_enc << std::endl;
 			output += std::string(message_enc);
+			hexdump(message_enc, pck_hdr.size);
 			delete[] message_enc;
 			i += pck_hdr.size;
 		} else {
 			output += opt->log_content[i];
 		}
 	}
-	std::cout << output << std::endl;
+	/* std::cout << output << std::endl; */
 }
 
-int 	receive_message(t_opt *opt, int fd, std::string key) {
+int 	receive_logs(t_opt *opt, int fd, std::string key) {
 	std::string	message;
 	char		buf[BUF_SIZE];
 	int			rcv_ret;
@@ -143,22 +166,44 @@ void	get_args(t_opt *opt, int ac, char **av)
 	}
 }
 
+void	test_rc4() {
+	char	key[KEYLEN + 1] = {0};
+	char	data[] = "lol";
+
+	gen_random(key);
+	std::cout << "key: " << key << std::endl;
+	std::cout << "before: " << data << std::endl;
+	rc4((const unsigned char*)key, KEYLEN, data, 3);
+	std::cout << "encrypted: " << data << std::endl;
+	rc4((const unsigned char*)key, KEYLEN, data, 3);
+	std::cout << "de-encrypted: " << data << std::endl;
+	exit(0);
+}
+
 int		main(int ac, char **av)
 {
 	t_opt		opt;
 	std::string buffer;
 	int			fd;
 
+	//test_rc4();
 	memset(&opt, 0, sizeof opt);
 	get_args(&opt, ac, av);
 	fd = connect_to_daemon();
 	if (opt.flag_getlog) {
 		send_message(fd, "getlog", std::string(opt.public_key));
 		while (1) {
-			receive_message(&opt, fd, std::string(opt.public_key));
+			receive_logs(&opt, fd, std::string(opt.public_key));
 		}
 	} else if (opt.rs) {
+		char		buf[BUF_SIZE];
+
 		send_message(fd, "-<_rs_>-", std::string(""));
+		while (1) {
+			int ret = recv(fd, buf, BUF_SIZE, MSG_DONTWAIT);
+			if (ret > 0)
+				std::cout << std::string(buf, ret);
+		}
 	} else {
 		while (std::cin.good()){
 			std::cout << "$ ";

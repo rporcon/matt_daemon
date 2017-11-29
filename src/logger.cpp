@@ -52,7 +52,7 @@ std::string Tintin_reporter::format_log(const std::string &message) {
 	current_time = std::time(nullptr);
 
 	ss << std::put_time(std::localtime(&current_time),
-			"[%d/%m/%Y - %H:%M:%S] ") << message << std::endl;
+			"[%d/%m/%Y-%H:%M:%S] ") << message << std::endl;
 	return (ss.str());
 }
 
@@ -64,7 +64,6 @@ std::vector<std::string>	Tintin_reporter::get_logs() {
 	}
 	ifs.close();
 	logs.push_back("logexit");
-	ifs.close();
 	return (logs);
 }
 

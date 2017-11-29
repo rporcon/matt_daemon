@@ -38,3 +38,4 @@ void		print_help(void);
 void		rc4(const unsigned char *key, int keylen,
 				char *data, size_t data_len);
 void		keygen(void);
+void		gen_random(char *s);
