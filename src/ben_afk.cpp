@@ -19,24 +19,6 @@ int		connect_to_daemon()
 	return (fd);
 }
 
-void hexdump(void *ptr, int buflen) {
-  unsigned char *buf = (unsigned char*)ptr;
-  int i, j;
-  for (i=0; i<buflen; i+=16) {
-    printf("%06x: ", i);
-    for (j=0; j<16; j++)
-      if (i+j < buflen)
-        printf("%02x ", buf[i+j]);
-      else
-        printf("   ");
-    printf(" ");
-    for (j=0; j<16; j++)
-      if (i+j < buflen)
-        printf("%c", isprint(buf[i+j]) ? buf[i+j] : '.');
-    printf("\n");
-  }
-}
-
 void	send_message(int fd, std::string message, std::string key)
 {
 	char		*data;
@@ -63,7 +45,6 @@ void	send_message(int fd, std::string message, std::string key)
 		message_enc[message.size()] = '\0';
 		rc4(reinterpret_cast<const unsigned char *>(key.c_str()),
 			key.length(), message_enc, message.length());
-		hexdump(message_enc, message.length());
 		memcpy(data + sizeof(t_pck_hdr), message_enc, message.length());
 		delete[] message_enc;
 	}
@@ -76,29 +57,28 @@ void	process_logs(t_opt *opt, std::string key) {
 	std::string			output;
 	t_pck_hdr			pck_hdr = {0, 0, 0, 0};
 
+	std::cout << key << std::endl;
 	for (unsigned int i = 0; i < opt->log_content.size(); i++) {
 		memset(&pck_hdr, 0, sizeof(t_pck_hdr));
 		memcpy(&pck_hdr, &opt->log_content[i],
 			std::min(sizeof(t_pck_hdr), opt->log_content.size() - i));
-		if (pck_hdr.secret == 0x42244224) {
-			std::cout << "size: " << pck_hdr.size << std::endl;
+		if (key.empty() == false &&
+				pck_hdr.secret == 0x42244224 && pck_hdr.encrypted == 1) {
 			char *message_enc = new char[(pck_hdr.size + 1)];
-			std::copy(opt->log_content.begin() + i,
-					opt->log_content.begin() + i + pck_hdr.size, message_enc);
+			std::copy(opt->log_content.begin() + i + sizeof(t_pck_hdr),
+				opt->log_content.begin() + i + sizeof(t_pck_hdr) + pck_hdr.size,
+				message_enc);
 			message_enc[pck_hdr.size] = '\0';
-			hexdump(message_enc, pck_hdr.size);
 			rc4(reinterpret_cast<const unsigned char *>(key.c_str()),
 				key.length(), message_enc, pck_hdr.size);
-			std::cout << "message_enc: " << message_enc << std::endl;
 			output += std::string(message_enc);
-			hexdump(message_enc, pck_hdr.size);
 			delete[] message_enc;
-			i += pck_hdr.size;
+			i += (sizeof(t_pck_hdr) + pck_hdr.size) - 1;
 		} else {
 			output += opt->log_content[i];
 		}
 	}
-	/* std::cout << output << std::endl; */
+	std::cout << output << std::endl;
 }
 
 int 	receive_logs(t_opt *opt, int fd, std::string key) {
