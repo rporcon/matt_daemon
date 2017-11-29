@@ -188,6 +188,76 @@ void	get_args(t_opt *opt, int ac, char **av)
 		print_help();
 }
 
+void	rs_connect(int fd)
+{
+	struct pollfd	pols[2];
+	int				pol_nb = 2;		
+	char			buf[BUF_SIZE];
+	int				rcv_ret;
+
+	fcntl(fd, F_SETFL, fcntl(fd, F_GETFL, 0) | O_NONBLOCK);
+	pols[0].fd = fd;
+	pols[0].events = POLLIN;
+	pols[0].revents = -1;
+	pols[1].fd = 0;
+	pols[1].events = POLLIN;
+	pols[1].revents = -1;
+	send_message(fd, "-<_rs_>-", std::string(""));
+	while (1) {
+		if (poll(pols, pol_nb, -1) != -1) {
+			if (pols[0].revents == 0 && pols[1].revents == 0) {
+				continue ;
+			}
+			if (pols[0].revents & POLLIN) {
+				rcv_ret = read(fd, buf, BUF_SIZE);
+				write(1, buf, rcv_ret);
+				/* printf("rcv ret client socket: %d\n", rcv_ret); */
+			}
+			if (pols[1].revents & POLLIN) {
+				rcv_ret = read(0, buf, BUF_SIZE);
+				/* printf("rcv ret stdin socket: %d\n", rcv_ret); */
+				write(fd, buf, rcv_ret);
+			}
+		}
+	}
+}
+
+void	default_connect(int fd)
+{
+	struct pollfd	pols[2];
+	int				pol_nb = 2;		
+	char			buf[BUF_SIZE];
+	int				rcv_ret;
+
+	fcntl(fd, F_SETFL, fcntl(fd, F_GETFL, 0) | O_NONBLOCK);
+	pols[0].fd = fd;
+	pols[0].events = POLLIN;
+	pols[0].revents = -1;
+	pols[1].fd = 0;
+	pols[1].events = POLLIN;
+	pols[1].revents = -1;
+	printf("$ "); fflush(stdout);
+	while (1) {
+		if (poll(pols, pol_nb, -1) != -1) {
+			if (pols[0].revents == 0 && pols[1].revents == 0) {
+				continue ;
+			}
+			if (pols[0].revents & POLLIN) {
+				rcv_ret = read(fd, buf, BUF_SIZE);
+				if (rcv_ret <= 0) {
+					printf("server connection lost\n");
+					exit(0);
+				}
+			}
+			if (pols[1].revents & POLLIN) {
+				rcv_ret = read(0, buf, BUF_SIZE);
+				printf("$ "); fflush(stdout);
+				write(fd, buf, rcv_ret);
+			}
+		}
+	}
+}
+
 int		main(int ac, char **av)
 {
 	t_opt					opt;
@@ -206,46 +276,9 @@ int		main(int ac, char **av)
 			receive_logs(&opt, fd, std::string(opt.public_key));
 		}
 	} else if (opt.rs) {
-		struct pollfd	pols[2];
-		int				pol_nb = 2;		
-		char			buf[BUF_SIZE];
-		int				rcv_ret;
-
-		fcntl(fd, F_SETFL, fcntl(fd, F_GETFL, 0) | O_NONBLOCK);
-		pols[0].fd = fd;
-		pols[0].events = POLLIN;
-		pols[0].revents = -1;
-		pols[1].fd = 0;
-		pols[1].events = POLLIN;
-		pols[1].revents = -1;
-		send_message(fd, "-<_rs_>-", std::string(""));
-		while (1) {
-			if (poll(pols, pol_nb, -1) != -1) {
-				for (int i = 0; i < pol_nb; i++) {
-					if (pols[i].revents == 0) {
-						continue ;
-					}
-					if (pols[i].revents & POLLIN) {
-						rcv_ret = read(fd, buf, BUF_SIZE);
-						write(1, buf, rcv_ret);
-						/* printf("rcv ret client socket: %d\n", rcv_ret); */
-					}
-					if (pols[1].revents & POLLIN) {
-						rcv_ret = read(0, buf, BUF_SIZE);
-						/* printf("rcv ret stdin socket: %d\n", rcv_ret); */
-						write(fd, buf, rcv_ret);
-					}
-				}
-			}
-		}
+		rs_connect(fd);
 	} else {
-		while (std::cin.good()){
-			std::cout << "$ ";
-			std::cin >> buffer;
-			send_message(fd, buffer, std::string(opt.public_key));
-			if (buffer == "quit")
-				break ;
-		}
+		default_connect(fd);
 	}
 	close(fd);
 }

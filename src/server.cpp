@@ -177,7 +177,7 @@ void Server::accept_clt_sock () {
 				}
 				if (pols[i].fd == this->sock) {
 					if ((clt_sock = accept(this->sock, NULL, NULL)) < 0) {
-						perr_exit("accept");
+						log_exit("cannot accept client", 1);
 					}
 					Tintin_reporter::getInstance().log(
 							"attempt to connect on socket " + std::to_string(clt_sock));
