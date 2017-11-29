@@ -113,7 +113,6 @@ void Server::pck_rcv(int *clt_sock, int *clean_fd, int index_fd)
 	}
 
 	if (rcv_ret <= 0) {
-		/* printf("close fd: %d\n", *clt_sock); */
 		Tintin_reporter::getInstance().log("closed client socket "
 				+ std::to_string(*clt_sock));
 		this->client_msg[index_fd].clear();
@@ -123,7 +122,7 @@ void Server::pck_rcv(int *clt_sock, int *clean_fd, int index_fd)
 	}
 }
 
-void Server::server_create (int port) {
+void Server::create (int port) {
 	struct protoent			*proto;
 	struct sockaddr_in6		sin6;
 	int						flags;
@@ -143,6 +142,31 @@ void Server::server_create (int port) {
 	sin6.sin6_port = htons(port);
 	sin6.sin6_addr = in6addr_any;
 	if (bind(this->sock, (struct sockaddr *)&sin6, sizeof(sin6)) == -1)
+		log_exit("cannot bind server socket", 1);
+	if (listen(this->sock, 42) == -1)
+		log_exit("cannot listen to port 42", 1);
+}
+
+void Server::create_localhost (int port) {
+	struct protoent			*proto;
+	struct sockaddr_in		sin;
+	int						flags;
+	int						on = 1;
+
+	if ((proto = getprotobyname("tcp")) == NULL)
+		perr_exit("getprotobyname");
+	if ((this->sock = socket(AF_INET, SOCK_STREAM, proto->p_proto)) == -1)
+		perr_exit("socket");
+	if (setsockopt(this->sock, SOL_SOCKET, SO_REUSEADDR, (char *)&on, sizeof(on)) == -1)
+		perr_exit("setsockopt SO_REUSEADDR");
+	flags = fcntl(this->sock, F_GETFL, 0);
+	fcntl(this->sock, F_SETFL, flags | O_NONBLOCK);
+
+	bzero(&sin, sizeof(sin));
+	sin.sin_family = AF_INET;
+	sin.sin_port = htons(port);
+	sin.sin_addr.s_addr = inet_addr("127.0.0.1");
+	if (bind(this->sock, (struct sockaddr *)&sin, sizeof(sin)) == -1)
 		log_exit("cannot bind server socket", 1);
 	if (listen(this->sock, 42) == -1)
 		log_exit("cannot listen to port 42", 1);

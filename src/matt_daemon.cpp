@@ -58,7 +58,8 @@ int main(void) {
 		}
 	}
 
-	serv.server_create(4242);
+	serv.create(4242);
+	/* serv.create_localhost(4242); */
 	serv.accept_clt_sock();
 	return (0);
 }

@@ -22,7 +22,8 @@ class Server {
 		Server(Server const &src);
 		Server &operator=(Server const & rhs);
 		virtual ~Server ();
-		void server_create (int);
+		void create (int);
+		void create_localhost (int);
 		void accept_clt_sock (void);
 		void clean_fd(struct pollfd *, int, int *);
 		void pck_rcv(int *, int *, int);

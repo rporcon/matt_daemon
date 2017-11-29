@@ -7,7 +7,7 @@
 #include <sstream>
 #include <iostream>
 #include <iomanip>
-#include <libtar.h>
+#include <libtar.h> // need libtar-dev installed
 #include <unistd.h>
 #include <fcntl.h>
 
