@@ -6,7 +6,7 @@
 /*   By: rporcon <rporcon@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2017/08/19 19:07:53 by rporcon           #+#    #+#             */
-/*   Updated: 2017/11/29 19:04:02 by amathias         ###   ########.fr       */
+/*   Updated: 2017/11/30 09:38:49 by amathias         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -144,7 +144,7 @@ void Server::create (int port) {
 	if (bind(this->sock, (struct sockaddr *)&sin6, sizeof(sin6)) == -1)
 		log_exit("cannot bind server socket", 1);
 	if (listen(this->sock, 42) == -1)
-		log_exit("cannot listen to port 42", 1);
+		log_exit("cannot listen to port 4242", 1);
 }
 
 void Server::create_localhost (int port) {
