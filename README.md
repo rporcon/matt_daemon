@@ -17,3 +17,5 @@ Usage: ./Ben_AFK [hostname/ip] [options]
 	-g     get log from daemon
 	-6     connect to daemon with ipv6 address
 ```
+
+More details in **Matt_daemon.fr.pdf** (in french)
